@@ -48,7 +48,7 @@ uint16_t checksum(void* data, uint16_t length) {
 /* Calculates checksum for IPv6 pseudoheader */
 // might not work for not-ndp packets
 /* ipv6 pseudo-header used to calculate the checksum contains source address, destination address, icmpv6 length, 3 octets of 0 and next header id */
-uint16_t checksum_pseudo(void* data, uint16_t* src_addr, uint16_t* dest_addr, int next_hdr, uint8_t data_len) {
+uint16_t checksum_pseudo(void* data, uint16_t* src_addr, uint16_t* dest_addr, uint8_t next_hdr, uint8_t data_len) {
 	uint16_t pseudo_hdr_len = 4 * IPV6_ADDR_LEN + 8 + data_len;
 	uint8_t buf[pseudo_hdr_len];
 	memset(buf, 0x0, pseudo_hdr_len);
@@ -57,8 +57,6 @@ uint16_t checksum_pseudo(void* data, uint16_t* src_addr, uint16_t* dest_addr, in
 	memset(buf + 4 * IPV6_ADDR_LEN + 3, data_len, 1);	// uwaga! problem dla duzych pakietow - wykorzystac htonl? // TODO
 	memset(buf + 4 * IPV6_ADDR_LEN + 7, next_hdr, 1);	/* 3 octets of 0's and next header's id */
 	memcpy(buf + 4 * IPV6_ADDR_LEN + 8, data, data_len);
-
-	printf("%d\n", ICMP_HDR_LEN + 4 * IPV6_ADDR_LEN + 8);
 
 	// for testing
 	int i;

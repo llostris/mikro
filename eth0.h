@@ -22,5 +22,7 @@ union ethframe {
         unsigned char buffer[ETH_FRAME_LEN];
 };
 
+int get_hardware_info(int* ifindex, unsigned char* hw_addr, int sockfd);
+
 #endif
 

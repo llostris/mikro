@@ -24,8 +24,6 @@ struct mac_table_record mac_table[MAC_TABLE_SIZE];
 
 /* sends ICMP packet with NDP solicitation message */
 int send_ndp_solicitation(uint16_t* ip_addr) {
-
-	char *iface = "eth0";
 	int proto = ETH_TYPE_IP6;
 	unsigned char src_hw[ETH_ADDR_LEN];	
 	unsigned char dest_hw[ETH_ADDR_LEN] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };	// broadcast
@@ -39,24 +37,14 @@ int send_ndp_solicitation(uint16_t* ip_addr) {
 	printf("socket opened\n");
 
 	/* Get interface index and hardware address of host */
-	// wrzucic to do osobnej funkcji
-	// i przechowywac w jakiejs zmiennej
+	// wrzucic to do osobnej funkcji - DONE
+	// i przechowywac w jakiejs zmiennej TODO ??
+
 	int ifindex = 0;
-	struct ifreq buffer;
-	memset(&buffer, 0x00, sizeof(buffer));
-	strncpy(buffer.ifr_name, iface, IFNAMSIZ);
-	if ( ioctl(sockfd, SIOCGIFINDEX, &buffer) < 0 ) {
-		printf("Error: could not get interface index.\n");
+	if ( get_hardware_info(&ifindex, src_hw, sockfd) < 0 ) {
+		printf("Error: could not get hardware's information\n");
 		return -1;
 	}
-	ifindex = buffer.ifr_ifindex;
-
-	if (ioctl(sockfd, SIOCGIFHWADDR, &buffer) < 0) {
-		printf("Error: could not get interface address\n");
- 		close(sockfd);
-	return -1;
-  	}
-	memcpy((void*)src_hw, (void*)(buffer.ifr_hwaddr.sa_data), ETH_ADDR_LEN);
 
 	uint16_t src_ipaddr[IPV6_ADDR_LEN] = { 0xfe80, 0x0, 0xa00, 0x27ff, 0xfe5c, 0x2c16, 0x0, 0x0 };
 
@@ -132,7 +120,6 @@ int send_ndp_solicitation(uint16_t* ip_addr) {
 /* sends ICMP packet with NDP solicitation message */
 int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_hw_addr) {
 
-	char *iface = "eth0";
 	int proto = ETH_TYPE_IP6;
 	unsigned char src_hw[ETH_ADDR_LEN];
 	uint16_t src_ip_addr[IPV6_ADDR_LEN] = { 0xfe80, 0x0, 0xa00, 0x27ff, 0xfe5c, 0x2c16, 0x0, 0x0 };
@@ -147,24 +134,11 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 	printf("socket opened\n");
 
 	/* Get interface index and hardware address of host */
-	// wrzucic to do osobnej funkcji
-	// i przechowywac w jakiejs zmiennej ?
 	int ifindex = 0;
-	struct ifreq buffer;
-	memset(&buffer, 0x00, sizeof(buffer));
-	strncpy(buffer.ifr_name, iface, IFNAMSIZ);
-	if ( ioctl(sockfd, SIOCGIFINDEX, &buffer) < 0 ) {
-		printf("Error: could not get interface index.\n");
+	if ( get_hardware_info(&ifindex, src_hw, sockfd) < 0 ) {
+		printf("Error: could not get hardware's information\n");
 		return -1;
 	}
-	ifindex = buffer.ifr_ifindex;
-
-	if (ioctl(sockfd, SIOCGIFHWADDR, &buffer) < 0) {
-		printf("Error: could not get interface address\n");
- 		close(sockfd);
-	return -1;
-  	}
-	memcpy((void*)src_hw, (void*)(buffer.ifr_hwaddr.sa_data), ETH_ADDR_LEN);
 
 	printf("address aquaired\n");
 
