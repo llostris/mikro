@@ -1,10 +1,10 @@
 CC = gcc
 CFLAGS = -I. #-Wall 
-OBJS = eth0.o ipv6.o ndp.o test.o #ndp.o test1.o test2.o
+OBJS = eth0.o ipv6.o ndp.o test.o #test1.o test2.o
 LIBNAME = libip
 LIB = -L. -lip
 LIBPATH = -Wl,-rpath=.
-TESTS =  test_ndp.o test_eth0.o
+TESTS =  test_ndp.o test_eth0.o test_geteth0.o
 OBJ_D = $(OBJS:.o=_fPIC.o)
 
 #all: dynamic tests
@@ -23,12 +23,12 @@ static: $(OBJS)
 
 #tests: $(TESTS) 
 #	$(CC) $(LIBPATH) $(TESTS) -o $@.o $(LIB)
-
 tests_static: static $(TESTS)
 	
 test_%.o : test_%.c
 	$(CC) -static $< -o $@ $(LIB)
-	$(CC) -o $* $@ $(LFLAGS)
+	
+#$(CC) -o $* $@ $(LFLAGS)	# rzuca bledami
 	
 
 $(OBJ_D): $(SRC)

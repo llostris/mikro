@@ -1,6 +1,11 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+/*
+#define BIG_ENDIAN 0
+#define LITTLE_ENDIAN 1
+*/
+
 #define uint8_t unsigned char
 #define uint16_t unsigned short
 #define uint32_t unsigned int

@@ -119,7 +119,6 @@ int send_ndp_solicitation(uint16_t* ip_addr) {
 
 /* sends ICMP packet with NDP solicitation message */
 int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_hw_addr) {
-
 	int proto = ETH_TYPE_IP6;
 	unsigned char src_hw[ETH_ADDR_LEN];
 	uint16_t src_ip_addr[IPV6_ADDR_LEN] = { 0xfe80, 0x0, 0xa00, 0x27ff, 0xfe5c, 0x2c16, 0x0, 0x0 };
