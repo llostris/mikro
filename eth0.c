@@ -33,3 +33,29 @@ int get_hardware_info(int* ifindex, unsigned char* hw_addr, int sockfd) {
 
 	return 0;	
 }
+
+
+// tymczasowo
+int get_hardware_info1(int* ifindex, unsigned char* hw_addr, int sockfd) {
+	char *iface = "eth1";
+
+	*ifindex = 0;
+	struct ifreq buffer;
+	memset(&buffer, 0x00, sizeof(buffer));
+	strncpy(buffer.ifr_name, iface, IFNAMSIZ);
+	if ( ioctl(sockfd, SIOCGIFINDEX, &buffer) < 0 ) {
+		printf("Error: could not get interface index.\n");
+		return -1;
+	}
+	*ifindex = buffer.ifr_ifindex;
+
+	if (ioctl(sockfd, SIOCGIFHWADDR, &buffer) < 0) {
+		printf("Error: could not get interface address\n");
+ 		close(sockfd);
+	return -1;
+  	}
+
+	memcpy((void*)hw_addr, (void*)(buffer.ifr_hwaddr.sa_data), ETH_ADDR_LEN);
+
+	return 0;	
+}

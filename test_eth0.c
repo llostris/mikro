@@ -15,8 +15,9 @@ int main(int argc, char* argv[])
 {
 	int proto = 0x1234;
 	unsigned char src[ETH_ADDR_LEN] = { 0x08, 0x00, 0x27, 0x5c, 0x2c, 0x16 };	
-	unsigned char dest[ETH_ADDR_LEN] = { 0x89, 0x9F, 0xFA, 0x5B, 0x28, 0xE1 };
-	//memcpy(dest, src, ETH_ADDR_LEN);
+//	unsigned char dest[ETH_ADDR_LEN] = { 0x89, 0x9F, 0xFA, 0x5B, 0x28, 0xE1 };
+	unsigned char dest[ETH_ADDR_LEN] = { 0x08, 0x00, 0x27, 0xb9, 0x87, 0x5a}; 
+//	memcpy(dest, src, ETH_ADDR_LEN);
 	unsigned char* data = "hello world";
 	unsigned short data_len = strlen(data);
 

@@ -23,6 +23,7 @@ union ethframe {
 };
 
 int get_hardware_info(int* ifindex, unsigned char* hw_addr, int sockfd);
+int get_hardware_info1(int* ifindex, unsigned char* hw_addr, int sockfd);
 
 #endif
 

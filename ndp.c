@@ -117,12 +117,13 @@ int send_ndp_solicitation(uint16_t* ip_addr) {
 
 
 
-/* sends ICMP packet with NDP solicitation message */
+/* sends ICMP packet with NDP advertisement message */
 int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_hw_addr) {
 	int proto = ETH_TYPE_IP6;
 	unsigned char src_hw[ETH_ADDR_LEN];
+	unsigned char dest_hw[ETH_ADDR_LEN];
 	uint16_t src_ip_addr[IPV6_ADDR_LEN] = { 0xfe80, 0x0, 0xa00, 0x27ff, 0xfe5c, 0x2c16, 0x0, 0x0 };
-
+	uint16_t ipv6_multicast[IPV6_ADDR_LEN] = { 0xff02, 0x0, 0x0001, 0x0, 0x0, 0x0, 0x0, 0x0 };
 
 	int sockfd;
 	if ( (sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW)) < 0 ) {
@@ -139,12 +140,16 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 		return -1;
 	}
 
+	/* Set proper multicast address */
 	printf("address aquaired\n");
+	if ( solicited == 0 ) {
+		memcpy(ipv6_multicast + 3, src_hw + 3, 3);
 
 	/* Convert to little endian */
 	hton_ip_address(src_ip_addr);	
 	if ( solicited > 0 )
-		hton_ip_address(dest_ip_addr);	
+		hton_ip_address(dest_ip_addr);
+	hton_ip_address(ipv6_multicast);	
 
 	printf("addresses hton'ed\n");
 
@@ -155,8 +160,12 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 	icmphdr.checksum = 0;	
 	memset(icmphdr.data, 0, ICMP_RESERVED_LEN);
 	if ( solicited )
-		memset(icmphdr.data + 1, 1, 1);
-	memcpy(icmphdr.data + ICMP_RESERVED_LEN, src_ip_addr, IPV6_ADDR_LEN * 2);
+		memset(icmphdr.data + 1, 1, 1);	// set a proper flag
+	/* Target Address */
+	if ( solicited )
+		memcpy(icmphdr.data + ICMP_RESERVED_LEN, dest_ip_addr, IPV6_ADDR_LEN * 2);
+	else
+		memcpy(icmphdr.data + ICMP_RESERVED_LEN, src_ip_addr, IPV6_ADDR_LEN * 2);
 
 	printf("icmpv6 header created\n");	
 
@@ -176,12 +185,11 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 	ipv6hdr.next_hdr = NEXT_HDR_ICMP;	
 	ipv6hdr.hop_limit = DEFAULT_TTL;
 
+	memcpy(ipv6hdr.source_address, src_ip_addr, IPV6_ADDR_LEN * 2);
 	if ( solicited )
 		memcpy(ipv6hdr.destination_address, dest_ip_addr, IPV6_ADDR_LEN * 2); // bo mamy 16-bitowe pola - do zmiany?
 	else 
-		memset(ipv6hdr.destination_address, 0xff, IPV6_ADDR_LEN * 2);
-	memcpy(ipv6hdr.source_address, src_ip_addr, IPV6_ADDR_LEN * 2);
-
+		memcpy(ipv6hdr.destination_address, ipv6_multicast, IPV6_ADDR_LEN * 2);
 	/* Calculate ICMP checksum */	
 	icmphdr.checksum = checksum_pseudo(&icmphdr, ipv6hdr.source_address, ipv6hdr.destination_address, ipv6hdr.next_hdr, ICMP_HDR_LEN + ICMP_NDP_LEN);
 	printf("\nip header created\n");
@@ -190,8 +198,12 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 	union ethframe frame;
 	if ( solicited )
 		memcpy(frame.field.header.dest, dest_hw_addr, ETH_ADDR_LEN);
-	else
-		memset(frame.field.header.dest, 0, ETH_ADDR_LEN);
+	else {
+		/* IPV6 multicast */
+		memset(frame.field.header.dest, 0x33, 2);
+		memset(frame.field.header.dest + 2, 0x0, 1);
+		memcpy(frame.field.header.dest + 3, src_hw + 3, 3);
+	}
 	memcpy(frame.field.header.src, src_hw, ETH_ADDR_LEN);
 	frame.field.header.proto = htons(ETH_TYPE_IP6);
 	memcpy(frame.field.data, &ipv6hdr, IPV6_HDR_LEN);

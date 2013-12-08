@@ -17,17 +17,17 @@ int main(int argc, char* argv[])
 	unsigned char src[ETH_ADDR_LEN];
 	// htons(proto) jako 3 argument ??
 	//int proto = IPPROTO_RAW;
-	if ( (sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW)) < 0 ) {
+	if ( (sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW /*ETH_P_ALL /*IPPROTO_RAW*/)) < 0 ) {
 		printf("Error: could not open a socket.\n");
 		return -1;
 	}
 
+	char *iface = "eth1";
 	int ifindex = 0;
-	if ( get_hardware_info(&ifindex, src, sockfd) < 0 ) {
+	if ( get_hardware_info1(&ifindex, src, sockfd) < 0 ) {
 		printf("Error getting host's data\n");
 		return -1;
 	}
-
 
 	void* buffer = (void*)malloc(ETH_FRAME_LEN);
 	int frame_len = 0;
@@ -35,12 +35,23 @@ int main(int argc, char* argv[])
 	printf("waiting for frames...\n");
 
 	while ( 1 ) {
-	
+		printf("-");
+		
 		frame_len = recvfrom(sockfd, buffer, ETH_FRAME_LEN, 0, NULL, NULL);
 		if (frame_len == -1) { 
 			printf("no frame... ");
 			//errorhandling .... 
+		} else {
+			printf("%d", frame_len);
 		}
+		/*
+		frame_len = read(sockfd, buffer, ETH_FRAME_LEN);
+		if (frame_len == -1) { 
+			printf("no frame... ");
+			//errorhandling .... 
+		}
+		*/
+
 	}
 
 	/* get frame's data */
