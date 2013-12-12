@@ -9,21 +9,19 @@ struct tcp_header {
 	uint16_t destination_port;
 	uint32_t sequence_number;
 	uint32_t acknowledgement_number;
-	uint32_t	/* big endian */
+	uint32_
         	data_offset: 4,	
         	reserved: 3, //Always 000
         	flags: FLAGS_SIZE,
         	window_size: 16;
-	/* // little endian
-	// alternatywnie mozna zozstawic big endian i sprobowac brac uint32_t *ptr i zrobic htonl(&ptr)  - do przetestowania czy dziala
+	/*
 	uint32_t 
 		reserved: 3,
 		flag_ns: 1,
 		data_offset: 4,
 		flags: FLAGS_SIZE - 1,	// htons ?
 		window_size: 16;	// htons
-	*/
-	
+	*/	
 	uint16_t checksum;
 	uint16_t urgent_pointer;
 	uint32_t options[OPTIONS_LENGTH];

@@ -20,8 +20,8 @@
 
 #else
 
-#define HTONS(n) ( ((((uint16_t)(n) & 0xFF)) << 8) | (((unsigned short)(n) & 0xFF00) >> 8))
-#define NTOHS(n) ( ((((uint16_t)(n) & 0xFF)) << 8) | (((unsigned short)(n) & 0xFF00) >> 8))
+#define HTONS(n) ( ((((uint16_t)(n) & 0xFF)) << 8) | (((uint16_t)(n) & 0xFF00) >> 8))
+#define NTOHS(n) ( ((((uint16_t)(n) & 0xFF)) << 8) | (((uint16_t)(n) & 0xFF00) >> 8))
 /*
 #define HTONL(n) (n)	// TODO
 #define NTOHL(n) (n)	// TODO
@@ -39,6 +39,7 @@
 /*
 unsigned short htons(unsigned short n);
 unsigned short ntohs(unsigned short n);
+
 unsigned long htonl(unsigned long n);
 unsigned long ntohl(unsigned long n);
 

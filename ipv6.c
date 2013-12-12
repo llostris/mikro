@@ -60,15 +60,40 @@ uint16_t checksum_pseudo(void* data, uint16_t* src_addr, uint16_t* dest_addr, ui
 	memcpy(buf + 4 * IPV6_ADDR_LEN + 8, data, data_len);
 
 	// for testing
+/*
 	int i;
 	for ( i = 0; i < pseudo_hdr_len; i++ )
 	{
 		printf("%x ", buf[i]);
 		if ( (i + 1) % 16 == 0 )
 			printf("\n");
-	}	
+	}
+*/	
 
 	return checksum(&buf, pseudo_hdr_len);
 }
 
+uint8_t ipv6_addr_compare(uint16_t* addr1, uint16_t* addr2) {
+	uint8_t result = 1;
+	uint8_t ind = 0;
+	for ( ind = 0; ind < IPV6_ADDR_LEN; ind++ )
+		result = result && ( addr1[ind] == addr2[ind]);
+	return result;
+}
+
+
+/* Converts little endian to big endian where needed */
+void parse_ipv6(union ethframe* frame, struct ip6_hdr* iphdr) {
+	memcpy(iphdr, frame->field.data, IPV6_HDR_LEN);
+	iphdr->payload_len = ntohs(iphdr->payload_len);
+	hton_ip_address(iphdr->source_address);
+	hton_ip_address(iphdr->destination_address);
+	iphdr->flow_label2 = ntohs(iphdr->flow_label2);
+}
+
+// na razie dziala tylko dla NDP
+void parse_icmp(union ethframe* frame, struct icmp6_hdr* hdr) {
+	memcpy(hdr, frame->field.data + IPV6_HDR_LEN, ICMP_HDR_LEN + ICMP_NDP_LEN);
+	ntoh_structure(hdr, ICMP_HDR_LEN);
+}
 

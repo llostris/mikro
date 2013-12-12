@@ -13,16 +13,7 @@
 #include <eth0.h>
 
 
-// gdzie to wrzucic?
-struct mac_table_record {
-	uint16_t ip_addr[IPV6_ADDR_LEN];
-	uint8_t eth_addr[ETH_ADDR_LEN];
-	uint8_t ref_time;
-};
-
-struct mac_table_record mac_table[MAC_TABLE_SIZE];
-
-/* sends ICMP packet with NDP solicitation message */
+/* Sends ICMP packet with NDP solicitation message */
 int send_ndp_solicitation(uint16_t* ip_addr) {
 	int proto = ETH_TYPE_IP6;
 	unsigned char src_hw[ETH_ADDR_LEN];	
@@ -117,7 +108,7 @@ int send_ndp_solicitation(uint16_t* ip_addr) {
 
 
 
-/* sends ICMP packet with NDP advertisement message */
+/* Sends ICMP packet with NDP advertisement message */
 int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_hw_addr) {
 	int proto = ETH_TYPE_IP6;
 	unsigned char src_hw[ETH_ADDR_LEN];
@@ -140,10 +131,7 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 		return -1;
 	}
 
-	/* Set proper multicast address */
 	printf("address aquaired\n");
-	if ( solicited == 0 ) {
-		memcpy(ipv6_multicast + 3, src_hw + 3, 3);
 
 	/* Convert to little endian */
 	hton_ip_address(src_ip_addr);	
@@ -160,7 +148,10 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 	icmphdr.checksum = 0;	
 	memset(icmphdr.data, 0, ICMP_RESERVED_LEN);
 	if ( solicited )
-		memset(icmphdr.data + 1, 1, 1);	// set a proper flag
+		memset(icmphdr.data, ICMP_FLAG_SOLICITED, 1);	// set a proper flag
+	else
+		memset(icmphdr.data, ICMP_FLAG_OVERRIDE, 1);
+
 	/* Target Address */
 	if ( solicited )
 		memcpy(icmphdr.data + ICMP_RESERVED_LEN, dest_ip_addr, IPV6_ADDR_LEN * 2);
@@ -231,3 +222,11 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 	printf("Everything worked!\n");
 }
 
+/*
+void get_ndp_advertisement(uint16_t dest_ipaddr[IPV6_ADDR_LEN]) {
+	send_ndp_solicitation(dest_ipaddr);
+	
+
+	
+}
+*/
