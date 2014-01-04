@@ -7,9 +7,9 @@
 #define ETH_HDR_LEN	14	/* Header length in octets */
 #define ETH_TYPE_IP6	0x86DD	/* EtherType for IPv6 packets */
 
-/* socket flags/types */
+/* Socket flags/types */
 #define ETH_P_ALL	0x0003	/* Receive all ethernet frames */
-#define ETH_P_IPV6	0x86DD	/* Receive IPv6 packets */
+#define ETH_P_IPV6	0x86DD	/* Receive IPv6 packets only */
 
 
 struct ethhdr {
@@ -27,7 +27,6 @@ union ethframe {
 };
 
 int get_hardware_info(int* ifindex, unsigned char* hw_addr, int sockfd);
-int get_hardware_info1(int* ifindex, unsigned char* hw_addr, int sockfd);
 
 /* Performs big endian <-> little endian conversion of whole structures */
 void hton_structure(void* buffer, unsigned int size);

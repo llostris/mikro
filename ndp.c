@@ -222,11 +222,29 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 	printf("Everything worked!\n");
 }
 
-/*
-void get_ndp_advertisement(uint16_t dest_ipaddr[IPV6_ADDR_LEN]) {
-	send_ndp_solicitation(dest_ipaddr);
-	
 
-	
+
+
+void icmp_actions(union ethframe* frame, struct ip6_hdr* iphdr, struct icmp6_hdr* icmphdr, uint16_t* src_ipaddr) {
+	if ( icmphdr->code == ICMP_NDP_SOLICIT && ipv6_addr_compare(iphdr->source_address, src_ipaddr) ) {
+		send_ndp_advertisement(ICMP_ADVERT_SOLICITED, iphdr->source_address, frame->field.header.src);
+	} else if ( icmphdr->code == ICMP_NDP_ADVERT ) {
+		update_mac_table(iphdr->source_address, frame->field.header.src);
+	}
 }
-*/
+
+void update_mac_table(uint16_t* ipaddr, uint8_t* macaddr) {
+	int iter = 0;
+	for ( iter = 0; iter < mac_index; iter++ ) {
+		if ( ipv6_addr_compare(ipaddr, mac_table[iter].ip_addr) == 1 )
+			break;
+	}
+	if ( iter != mac_index )
+		memcpy(mac_table[iter].ip_addr, ipaddr, IPV6_ADDR_LEN);
+	memcpy(mac_table[iter].mac_addr, macaddr, ETH_ADDR_LEN);
+	mac_table[iter].ref_time = MAC_TABLE_TIME;
+	mac_index++;
+}
+
+
+

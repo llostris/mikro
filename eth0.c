@@ -27,12 +27,12 @@ int get_hardware_info(int* ifindex, unsigned char* hw_addr, int sockfd) {
 	if (ioctl(sockfd, SIOCGIFHWADDR, &buffer) < 0) {
 		printf("Error: could not get interface address\n");
  		close(sockfd);
-	return -1;
+		return -1;
   	}
 
 	memcpy((void*)hw_addr, (void*)(buffer.ifr_hwaddr.sa_data), ETH_ADDR_LEN);
 
-	return 0;	
+	return 0;
 }
 
 

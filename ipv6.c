@@ -33,7 +33,7 @@ uint16_t checksum(void* data, uint16_t length) {
 		length -= 2;
 	}
 
-	/* odd byte handling */
+	/* Odd byte handling */
 	if (length == 1) {
 		sum += *(unsigned char *)dataptr;
 	}
@@ -73,6 +73,7 @@ uint16_t checksum_pseudo(void* data, uint16_t* src_addr, uint16_t* dest_addr, ui
 	return checksum(&buf, pseudo_hdr_len);
 }
 
+/* Returns 1 when addr1 and addr2 are the same, 0 otherwise */
 uint8_t ipv6_addr_compare(uint16_t* addr1, uint16_t* addr2) {
 	uint8_t result = 1;
 	uint8_t ind = 0;
@@ -80,7 +81,6 @@ uint8_t ipv6_addr_compare(uint16_t* addr1, uint16_t* addr2) {
 		result = result && ( addr1[ind] == addr2[ind]);
 	return result;
 }
-
 
 /* Converts little endian to big endian where needed */
 void parse_ipv6(union ethframe* frame, struct ip6_hdr* iphdr) {

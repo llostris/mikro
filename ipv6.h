@@ -1,11 +1,11 @@
 #ifndef IPV6_H
 #define IPV6_H
 
-//#include <types.h>
 #include "types.h"
 #include "eth0.h"
 
-#define IPV6_ADDR_LEN	8
+#define IPV6_ADDR_LEN	8	/* Octets in IPv6 address / 2 */
+#define IPV6_ADDR_OCT	16
 #define IPV6_HDR_LEN	40
 #define ICMP_HDR_LEN	4
 #define ICMP_RESERVED_LEN	4
@@ -25,7 +25,8 @@
 #define NEXT_HDR_TCP	6
 #define NEXT_HDR_NONE	59
 
-#define MAC_TABLE_SIZE 	30
+/* MAC/IP Table implementation */
+#define MAC_TABLE_SIZE 	1000
 #define MAC_TABLE_TIME	1000
 
 struct icmp6_hdr {
@@ -33,7 +34,7 @@ struct icmp6_hdr {
 	uint8_t code;
 	uint16_t checksum;
 	//uint32_t reserved;	// zmienic na reserved + payload?
-	uint8_t data[ICMP_NDP_LEN];	// to be changed eventually
+	uint8_t data[ICMP_NDP_LEN];
 };
 
 // big endian version
@@ -70,6 +71,7 @@ struct ip6_frame {
 };
 
 void hton_ip_address(uint16_t* ip_address);
+uint8_t ipv6_addr_compare(uint16_t* addr1, uint16_t* addr2);
 
 uint16_t checksum(void* data, uint16_t length);
 uint16_t checksum_pseudo(void* data, uint16_t* src_addr, uint16_t* dest_addr, uint8_t next_hdr, uint8_t data_len);
@@ -80,17 +82,19 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 void parse_ipv6(union ethframe* frame, struct ip6_hdr* iphdr);
 void parse_icmp(union ethframe* frame, struct icmp6_hdr* hdr);
 
-// gdzie to wrzucic?
+void icmp_actions(union ethframe* frame, struct ip6_hdr* iphdr, struct icmp6_hdr* icmphdr, uint16_t* src_ipaddr);
+void update_mac_table(uint16_t* ipaddr, uint8_t* macaddr);
+
+/* MAC Table Implementation */
 struct mac_table_record {
 	uint16_t ip_addr[IPV6_ADDR_LEN];
 	uint8_t mac_addr[ETH_ADDR_LEN];
 	uint16_t ref_time;
 };
 
-/*
 struct mac_table_record mac_table[MAC_TABLE_SIZE];
-int mac_index = 0;
-*/
+static int mac_index = 0;
+
 
 
 #endif
