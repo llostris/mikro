@@ -246,5 +246,8 @@ void update_mac_table(uint16_t* ipaddr, uint8_t* macaddr) {
 	mac_index++;
 }
 
+uint8_t lookup_mac_address(uint16_t* ip_addr, uint8_t* mac_buffer) {
+	
+}
 
 
