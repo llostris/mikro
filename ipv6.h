@@ -29,6 +29,9 @@
 #define MAC_TABLE_SIZE 	1000
 #define MAC_TABLE_TIME	1000
 
+uint16_t your_ip_address[2 * IPV6_ADDR_LEN];
+// = { 0xfe80, 0x0, 0xa00, 0x27ff, 0xfe5c, 0x2c16, 0x0, 0x0 };
+
 struct icmp6_hdr {
 	uint8_t type;
 	uint8_t code;

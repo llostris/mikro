@@ -234,20 +234,55 @@ void icmp_actions(union ethframe* frame, struct ip6_hdr* iphdr, struct icmp6_hdr
 }
 
 void update_mac_table(uint16_t* ipaddr, uint8_t* macaddr) {
+	/* testing
+	printf("src address: ");
+	int i;
+	for ( i = 0; i < ETH_ADDR_LEN; i++ )
+		printf("%x ", macaddr[i]);
+	printf(" --- ");
+	for ( i = 0; i < 2 * IPV6_ADDR_LEN; i++ )
+		printf("%x ", ipaddr[i]);
+	*/
+
 	int iter = 0;
 	for ( iter = 0; iter < mac_index; iter++ ) {
 		if ( ipv6_addr_compare(ipaddr, mac_table[iter].ip_addr) == 1 )
 			break;
 	}
-	if ( iter != mac_index )
-		memcpy(mac_table[iter].ip_addr, ipaddr, IPV6_ADDR_LEN);
+	if ( iter == mac_index ) {
+		memcpy(mac_table[iter].ip_addr, ipaddr, 2 * IPV6_ADDR_LEN);
+		mac_index++;
+	}
 	memcpy(mac_table[iter].mac_addr, macaddr, ETH_ADDR_LEN);
 	mac_table[iter].ref_time = MAC_TABLE_TIME;
-	mac_index++;
+
+//	printf("------- IP/MAC ADDRESS SAVED ------ \n");
 }
 
 uint8_t lookup_mac_address(uint16_t* ip_addr, uint8_t* mac_buffer) {
-	
+	int iter = 0;
+	for ( iter = 0; iter < mac_index; iter++ ) {
+		if ( ipv6_addr_compare(ip_addr, mac_table[iter].ip_addr) == 1 ) {
+			memcpy(mac_buffer, mac_table[iter].ip_addr, IPV6_ADDR_LEN);
+			break;
+		}
+	}
+
+	if ( iter == mac_index )
+		return -1;	// IP address not found in a table
+	return 0;
 }
 
-
+void print_mac_table() {
+	int iter = 0;
+	int i = 0;
+	printf("------ MAC TABLE ------ \n");
+	for ( iter = 0; iter < mac_index; iter++ ) {
+		printf("\nIP: ");
+		for ( i = 0; i < 2 * IPV6_ADDR_LEN; i++ )
+			printf("%x ", mac_table[iter].ip_addr[i]);
+		printf("\nMAC: ");
+		for ( i = 0; i < ETH_ADDR_LEN; i++ )
+			printf("%x ", mac_table[iter].mac_addr[i]);
+	}
+}

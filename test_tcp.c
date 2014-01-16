@@ -12,6 +12,7 @@
 #include "types.h"
 #include "eth0.h"
 #include "tcp.h"
+#include "testing.h"
 
 
 void create_tcp_hdr() {	

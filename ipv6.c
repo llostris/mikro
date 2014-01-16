@@ -97,3 +97,4 @@ void parse_icmp(union ethframe* frame, struct icmp6_hdr* hdr) {
 	ntoh_structure(hdr, ICMP_HDR_LEN);
 }
 
+

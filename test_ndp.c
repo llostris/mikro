@@ -5,12 +5,6 @@
 #include "types.h"
 #include "eth0.h"
 
-/*
-#include <types.h>
-#include <ipv6.h>
-#include <eth0.h>
-*/
-
 int main(int argc, char** argv) {
 	uint16_t dest_ipaddr[IPV6_ADDR_LEN] = { 0xfe80, 0x0, 0xa00, 0x27ff, 0xfe5c, 0x2c16, 0x0, 0x0 };
 	uint16_t dest_ipaddr2[IPV6_ADDR_LEN] = { 0xfe80, 0x0, 0xbd41, 0x2638, 0x69a0, 0x87d8, 0x0, 0x0 };
