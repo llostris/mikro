@@ -15,10 +15,6 @@
 #include "testing.h"
 
 
-void create_tcp_hdr() {	
-}
-
-
 int send_tcp(uint16_t* dest_ipaddr) {
 	int proto = ETH_TYPE_IP6;
 	unsigned char src_hw[ETH_ADDR_LEN];	
@@ -33,16 +29,15 @@ int send_tcp(uint16_t* dest_ipaddr) {
 	printf("socket opened\n");
 
 	/* Get interface index and hardware address of host */
-	// wrzucic to do osobnej funkcji - DONE
-	// i przechowywac w jakiejs zmiennej TODO ??
-
 	int ifindex = 0;
 	if ( get_hardware_info(&ifindex, src_hw, sockfd) < 0 ) {
 		printf("Error: could not get hardware's information\n");
 		return -1;
 	}
 
-	uint16_t src_ipaddr[IPV6_ADDR_LEN] = { 0xfe80, 0x0, 0xa00, 0x27ff, 0xfe5c, 0x2c16, 0x0, 0x0 };
+	//uint16_t src_ipaddr[IPV6_ADDR_LEN] = { 0xfe80, 0x0, 0xa00, 0x27ff, 0xfe5c, 0x2c16, 0x0, 0x0 };
+	uint16_t src_ipaddr[IPV6_ADDR_LEN];
+	memcpy(&src_ipaddr, &src_ip_address, 2 * IPV6_ADDR_LEN );
 
 	/* Convert to little endian */
 	hton_ip_address(src_ipaddr);	
@@ -57,11 +52,11 @@ int send_tcp(uint16_t* dest_ipaddr) {
 	tcpheader.data_offset = 5;
 	tcpheader.flags = TCP_FLAG_SYN;
 	tcpheader.window_size = 10;
-	tcpheader.checksum = checksum_pseudo(NULL, src_ipaddr, dest_ipaddr, NEXT_HDR_TCP, 0);
 	tcpheader.urgent_pointer = 0;
+	tcpheader.checksum = 0;
 
 	hton_structure(&tcpheader, TCP_HDR_LEN);
-
+	printf("\ntcp header (without checksum) created\n");
 
 	/* Create IPv6 Header */
 	struct ip6_hdr ipv6hdr;
@@ -82,19 +77,21 @@ int send_tcp(uint16_t* dest_ipaddr) {
 	memcpy(ipv6hdr.source_address, src_ipaddr, IPV6_ADDR_LEN * 2);
 
 	/* calculate checksum */	
-//	icmphdr.checksum = checksum_pseudo(&icmphdr, ipv6hdr.source_address, ipv6hdr.destination_address, ipv6hdr.next_hdr, TCP_HDR_LEN);
+	//tcpheader.checksum = htons(tcp_checksum(&ipv6hdr, &tcpheader, NULL, 0));
+	tcpheader.checksum = checksum_pseudo(&tcpheader, ipv6hdr.source_address, ipv6hdr.destination_address, ipv6hdr.next_hdr, TCP_HDR_LEN);
+
 	printf("\nip header created\n");
 
 	/* Create ethernet frame */
 	union ethframe frame;
+	// TODO PROPER destination mac addr
 	memset(frame.field.header.dest, 0, ETH_ADDR_LEN);
 	memcpy(frame.field.header.src, src_hw, ETH_ADDR_LEN);
 	frame.field.header.proto = htons(ETH_TYPE_IP6);
 	memcpy(frame.field.data, &ipv6hdr, IPV6_HDR_LEN);
 	memcpy(frame.field.data + IPV6_HDR_LEN, &tcpheader, TCP_HDR_LEN);
 
-	//TODO
-	int frame_len = ICMP_HDR_LEN + IPV6_HDR_LEN + TCP_HDR_LEN;
+	int frame_len = ETH_HDR_LEN + IPV6_HDR_LEN + TCP_HDR_LEN;
 	printf("frame created\n");
 
 	/* prepare the socket */

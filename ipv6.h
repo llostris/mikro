@@ -87,6 +87,7 @@ void parse_icmp(union ethframe* frame, struct icmp6_hdr* hdr);
 
 void icmp_actions(union ethframe* frame, struct ip6_hdr* iphdr, struct icmp6_hdr* icmphdr, uint16_t* src_ipaddr);
 void update_mac_table(uint16_t* ipaddr, uint8_t* macaddr);
+uint8_t lookup_mac_address(uint16_t* ip_addr, uint8_t* mac_buffer);
 
 /* MAC Table Implementation */
 struct mac_table_record {

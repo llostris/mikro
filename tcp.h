@@ -6,7 +6,7 @@
 
 #define FLAGS_SIZE	9
 #define OPTIONS_LENGTH	10
-#define TCP_HDR_LEN	30	/* Octets in TCP Header without options */
+#define TCP_HDR_LEN	20	/* Octets in TCP Header without options */
 
 #define PORT_HTTP	80
 
@@ -29,9 +29,10 @@ struct tcp_header {
 	uint32_t acknowledgement_number;
 	uint32_t
 		flags: FLAGS_SIZE,
-		reserved: 3,
-		data_offset: 4,	 	/* Header size in 32-bit words. Min. 5, max. 15. */
-		window_size: 16;	/* Always 000 */
+		reserved: 3,	/* Always 000 */
+
+		data_offset: 4,	 /* Header size in 32-bit words. Min. 5, max. 15. */
+		window_size: 16;
 	uint16_t checksum;
 	uint16_t urgent_pointer;
 	uint32_t options[OPTIONS_LENGTH];
@@ -43,5 +44,8 @@ struct tcp_frame {
 };
 
 void parse_tcp(union ethframe* frame, struct tcp_header* hdr);
+void tcp_actions(union ethframe* frame, struct tcp_header* hdr);
+void reply_tcp(union ethframe* frame, struct tcp_header* tcphdr);
+void create_tcp_hdr(struct tcp_header* hdr, int dest_port, int flags, int ack_num, int seq_num);
 
 #endif

@@ -63,6 +63,7 @@ uint16_t checksum_pseudo(void* data, uint16_t* src_addr, uint16_t* dest_addr, ui
 	// for testing
 
 	int i;
+	printf("Data len: %d\n", data_len);
 	for ( i = 0; i < pseudo_hdr_len; i++ )
 	{
 		printf("%x ", buf[i]);
