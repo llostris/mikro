@@ -12,6 +12,7 @@
 #include <ipv6.h>
 #include <eth0.h>
 
+uint16_t src_ip_address[2 * IPV6_ADDR_LEN] = { 0xfe80, 0x0, 0xa00, 0x27ff, 0xfe5c, 0x2c16, 0x0, 0x0 };
 
 /* Converts IPv6 address to big endian */
 void hton_ip_address(uint16_t* ip_address) {
@@ -47,7 +48,7 @@ uint16_t checksum(void* data, uint16_t length) {
 
 /* Calculates checksum for IPv6 pseudoheader */
 // might not work for not-ndp packets - TOCHECK
-uint16_t checksum_pseudo(void* data, uint16_t* src_addr, uint16_t* dest_addr, uint8_t next_hdr, uint8_t data_len) {
+uint16_t checksum_pseudo(void* data, uint16_t* src_addr, uint16_t* dest_addr, uint8_t next_hdr, uint32_t data_len) {
 	/* ipv6 pseudo-header used to calculate the checksum contains: source address, destination address, icmpv6 length, 3 octets of 0s and next header's id */
 
 	uint16_t pseudo_hdr_len = 4 * IPV6_ADDR_LEN + 8 + data_len;
@@ -55,12 +56,12 @@ uint16_t checksum_pseudo(void* data, uint16_t* src_addr, uint16_t* dest_addr, ui
 	memset(buf, 0x0, pseudo_hdr_len);
 	memcpy(buf, src_addr, IPV6_ADDR_LEN * 2);
 	memcpy(buf + 2 * IPV6_ADDR_LEN, dest_addr, IPV6_ADDR_LEN * 2);
-	memset(buf + 4 * IPV6_ADDR_LEN + 3, data_len, 1);	// uwaga! problem dla duzych pakietow - wykorzystac htons/htonl? // TODO
+	memcpy(buf + 4 * IPV6_ADDR_LEN + 3, &data_len, 4);
 	memset(buf + 4 * IPV6_ADDR_LEN + 7, next_hdr, 1);	/* 3 octets of 0's and next header's id */
 	memcpy(buf + 4 * IPV6_ADDR_LEN + 8, data, data_len);
 
 	// for testing
-/*
+
 	int i;
 	for ( i = 0; i < pseudo_hdr_len; i++ )
 	{
@@ -68,7 +69,7 @@ uint16_t checksum_pseudo(void* data, uint16_t* src_addr, uint16_t* dest_addr, ui
 		if ( (i + 1) % 16 == 0 )
 			printf("\n");
 	}
-*/	
+	
 
 	return checksum(&buf, pseudo_hdr_len);
 }
@@ -91,7 +92,7 @@ void parse_ipv6(union ethframe* frame, struct ip6_hdr* iphdr) {
 	iphdr->flow_label2 = ntohs(iphdr->flow_label2);
 }
 
-// na razie dziala tylko dla NDP
+// na razie dziala tylko dla NDP i TCP
 void parse_icmp(union ethframe* frame, struct icmp6_hdr* hdr) {
 	memcpy(hdr, frame->field.data + IPV6_HDR_LEN, ICMP_HDR_LEN + ICMP_NDP_LEN);
 	ntoh_structure(hdr, ICMP_HDR_LEN);

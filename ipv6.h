@@ -29,7 +29,7 @@
 #define MAC_TABLE_SIZE 	1000
 #define MAC_TABLE_TIME	1000
 
-uint16_t your_ip_address[2 * IPV6_ADDR_LEN];
+uint16_t src_ip_address[2 * IPV6_ADDR_LEN];
 // = { 0xfe80, 0x0, 0xa00, 0x27ff, 0xfe5c, 0x2c16, 0x0, 0x0 };
 
 struct icmp6_hdr {
@@ -77,7 +77,7 @@ void hton_ip_address(uint16_t* ip_address);
 uint8_t ipv6_addr_compare(uint16_t* addr1, uint16_t* addr2);
 
 uint16_t checksum(void* data, uint16_t length);
-uint16_t checksum_pseudo(void* data, uint16_t* src_addr, uint16_t* dest_addr, uint8_t next_hdr, uint8_t data_len);
+uint16_t checksum_pseudo(void* data, uint16_t* src_addr, uint16_t* dest_addr, uint8_t next_hdr, uint32_t data_len);
 
 int send_ndp_solicitation(uint16_t* ip_addr);
 int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_hw_addr);
