@@ -77,7 +77,6 @@ int send_tcp(uint16_t* dest_ipaddr) {
 	memcpy(ipv6hdr.source_address, src_ipaddr, IPV6_ADDR_LEN * 2);
 
 	/* calculate checksum */	
-	//tcpheader.checksum = htons(tcp_checksum(&ipv6hdr, &tcpheader, NULL, 0));
 	tcpheader.checksum = checksum_pseudo(&tcpheader, ipv6hdr.source_address, ipv6hdr.destination_address, ipv6hdr.next_hdr, TCP_HDR_LEN);
 
 	printf("\nip header created\n");

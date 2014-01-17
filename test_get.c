@@ -55,13 +55,8 @@ int main(int argc, char* argv[])
 					printf("\n---- TCP PACKET!!! ----- \n");
 					struct tcp_header tcphdr;
 					parsed_tcp(&frame, &tcphdr);
+					tcp_actions(&frame, &tcphdr);
 				}
-/*
-				struct icmp6_hdr icmphdr;
-				parsed_icmp(&frame, &icmphdr);
-				printf("\n\n");
-				icmp_actions(&frame, &iphdr, &icmphdr, src_ipaddr);
-				print_mac_table(); */
 			}
 		}
 		printf("\n\n");

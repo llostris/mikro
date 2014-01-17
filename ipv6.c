@@ -49,7 +49,11 @@ uint16_t checksum(void* data, uint16_t length) {
 /* Calculates checksum for IPv6 pseudoheader */
 // might not work for not-ndp packets - TOCHECK
 uint16_t checksum_pseudo(void* data, uint16_t* src_addr, uint16_t* dest_addr, uint8_t next_hdr, uint32_t data_len) {
-	/* ipv6 pseudo-header used to calculate the checksum contains: source address, destination address, icmpv6 length, 3 octets of 0s and next header's id */
+	/* ipv6 pseudo-header used to calculate the checksum contains: 
+		source address, destination address, 
+		icmpv6/tcp + data length, 
+		3 octets of 0s and next header's id,
+		ICMPv6/TCP header + data */
 
 	uint16_t pseudo_hdr_len = 4 * IPV6_ADDR_LEN + 8 + data_len;
 	uint8_t buf[pseudo_hdr_len];
@@ -60,8 +64,8 @@ uint16_t checksum_pseudo(void* data, uint16_t* src_addr, uint16_t* dest_addr, ui
 	memset(buf + 4 * IPV6_ADDR_LEN + 7, next_hdr, 1);	/* 3 octets of 0's and next header's id */
 	memcpy(buf + 4 * IPV6_ADDR_LEN + 8, data, data_len);
 
+/*
 	// for testing
-
 	int i;
 	printf("Data len: %d\n", data_len);
 	for ( i = 0; i < pseudo_hdr_len; i++ )
@@ -70,7 +74,7 @@ uint16_t checksum_pseudo(void* data, uint16_t* src_addr, uint16_t* dest_addr, ui
 		if ( (i + 1) % 16 == 0 )
 			printf("\n");
 	}
-	
+*/	
 
 	return checksum(&buf, pseudo_hdr_len);
 }

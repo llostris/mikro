@@ -32,5 +32,7 @@ int get_hardware_info(int* ifindex, unsigned char* hw_addr, int sockfd);
 void hton_structure(void* buffer, unsigned int size);
 void ntoh_structure(void* buffer, unsigned int size);
 
+int send_frame(union ethframe* frame, int frame_len);
+
 #endif
 

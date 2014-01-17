@@ -1,3 +1,7 @@
+#ifndef TESTING_H
+#define TESTING_H
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -77,3 +81,4 @@ int parsed_tcp(union ethframe* frame, struct tcp_header* hdr) {
 	printf("\n\n");
 };
 
+#endif

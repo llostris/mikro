@@ -55,3 +55,40 @@ void ntoh_structure(void* buffer, unsigned int size) {
 		ptr++;
 	}
 }
+
+int send_frame(union ethframe* frame, int frame_len) {
+	int proto = ETH_TYPE_IP6;
+
+	unsigned char src_hw[ETH_ADDR_LEN];	
+	unsigned char dest_hw[ETH_ADDR_LEN] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };	// broadcast
+
+	int sockfd;
+	if ( (sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW)) < 0 ) {
+		printf("Error: could not open a socket.\n");
+		return -1;
+	}
+
+	/* Get interface index and hardware address of host */
+	int ifindex = 0;
+	if ( get_hardware_info(&ifindex, src_hw/*frame->field.header.src*/, sockfd) < 0 ) {
+		printf("Error: could not get hardware's information\n");
+		return -1;
+	}
+
+	struct sockaddr_ll sockaddr;
+	memset((void*)&sockaddr, 0, sizeof(sockaddr));
+	sockaddr.sll_family = PF_PACKET;
+	sockaddr.sll_ifindex = ifindex;
+	sockaddr.sll_halen = ETH_ADDR_LEN;
+	memcpy((void*)sockaddr.sll_addr, (void*) dest_hw /*frame->field.header.dest*/, ETH_ADDR_LEN);
+	
+	if ( sendto(sockfd, frame->buffer, frame_len, 0, (struct sockaddr*) &sockaddr, sizeof(sockaddr)) <= 0 ) {
+		printf("Error sending a frame");
+		return -1;
+	} 
+
+	printf("\n *** FRAME SENT.");	// debugging
+
+	close(sockfd);
+
+}
