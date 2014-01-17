@@ -28,9 +28,6 @@ int send_ndp_solicitation(uint16_t* ip_addr) {
 	printf("socket opened\n");
 
 	/* Get interface index and hardware address of host */
-	// wrzucic to do osobnej funkcji - DONE
-	// i przechowywac w jakiejs zmiennej TODO ??
-
 	int ifindex = 0;
 	if ( get_hardware_info(&ifindex, src_hw, sockfd) < 0 ) {
 		printf("Error: could not get hardware's information\n");
@@ -38,6 +35,8 @@ int send_ndp_solicitation(uint16_t* ip_addr) {
 	}
 
 	uint16_t src_ipaddr[IPV6_ADDR_LEN] = { 0xfe80, 0x0, 0xa00, 0x27ff, 0xfe5c, 0x2c16, 0x0, 0x0 };
+	memcpy(&src_ipaddr, &src_ip_address, 2 * IPV6_ADDR_LEN );
+
 
 	/* Convert to little endian */
 	hton_ip_address(src_ipaddr);	
@@ -53,11 +52,6 @@ int send_ndp_solicitation(uint16_t* ip_addr) {
 
 	/* Create IPv6 Header */
 	struct ip6_hdr ipv6hdr;
-/*
-	ipv6hdr.version = 0x6;
-	ipv6hdr.traffic_class = 0x0;
-	ipv6hdr.flow_label = 0x0;
-*/
 	ipv6hdr.version = 6;
 	ipv6hdr.traffic_class1 = 0;
 	ipv6hdr.traffic_class2 = 0;
@@ -114,6 +108,8 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 	unsigned char src_hw[ETH_ADDR_LEN];
 	unsigned char dest_hw[ETH_ADDR_LEN];
 	uint16_t src_ip_addr[IPV6_ADDR_LEN] = { 0xfe80, 0x0, 0xa00, 0x27ff, 0xfe5c, 0x2c16, 0x0, 0x0 };
+	memcpy(&src_ip_addr, &src_ip_address, 2 * IPV6_ADDR_LEN );
+
 	uint16_t ipv6_multicast[IPV6_ADDR_LEN] = { 0xff02, 0x0, 0x0001, 0x0, 0x0, 0x0, 0x0, 0x0 };
 
 	int sockfd;
@@ -162,11 +158,6 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 
 	/* Create IPv6 Header */
 	struct ip6_hdr ipv6hdr;
-/*
-	ipv6hdr.version = 0x6;
-	ipv6hdr.traffic_class = 0x0;
-	ipv6hdr.flow_label = 0x0;
-*/
 	ipv6hdr.version = 6;
 	ipv6hdr.traffic_class1 = 0;
 	ipv6hdr.traffic_class2 = 0;
