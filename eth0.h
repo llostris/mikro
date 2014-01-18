@@ -10,6 +10,7 @@
 /* Socket flags/types */
 #define ETH_P_ALL	0x0003	/* Receive all ethernet frames */
 #define ETH_P_IPV6	0x86DD	/* Receive IPv6 packets only */
+#define ETH_P_TCP	0x0006	/* Receive TCP packets only */
 
 
 struct ethhdr {

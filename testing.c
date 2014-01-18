@@ -7,8 +7,8 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <string.h>
-#include <linux/in.h>	// ??
-#include <linux/if.h>	// interface
+#include <netinet/in.h>	// ??
+#include <net/if.h>	// interface
 #include <sys/ioctl.h>	//ioctl flags
 #include <netpacket/packet.h> // struct sockaddr_ll
 
