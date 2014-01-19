@@ -5,7 +5,8 @@ LIBNAME = libip
 LIB = -L. -lip
 LIBPATH = -Wl,-rpath=.
 TESTS =  test_ndp.o test_eth0.o test_geteth0.o test_getndp.o test_getndp2.o test_tcp.o test_get.o test_client.o test_listen.o
-OBJ_D = $(OBJS:.o=_fPIC.o)
+OBJS_D = $(OBJS:.o=_fPIC.o)
+TESTS_D = $(TESTS:test_%=dtest_%)
 
 #all: dynamic tests
 all: $(OBJS)
@@ -15,23 +16,32 @@ all: $(OBJS)
 static: $(OBJS)
 	ar -crs $(LIBNAME).a $(OBJS)
 
-#dynamic: $(OBJ_D)
-#	$(CC) $(CFLAGS) -shared -fPIC -o $(LIBNAME).so $(OBJ_D)
+dynamic: $(OBJS_D)
+	$(CC) $(CFLAGS) -shared -fPIC -o $(LIBNAME).so $(OBJS_D)
 
 
 # test programs
 
 #tests: $(TESTS) 
 #	$(CC) $(LIBPATH) $(TESTS) -o $@.o $(LIB)
+
 tests_static: static $(TESTS)
+
+tests_dynamic: dynamic $(TESTS_D)
 	
 test_%.o : test_%.c
 	$(CC) -static $< -o $@ $(LIB)
+
+dtest_%.o : test_%.c
+	$(CC) $(LIBPATH) $< -o $@ $(LIB)
+	
 	
 #$(CC) -o $* $@ $(LFLAGS)	# rzuca bledami
 	
 
-$(OBJ_D): $(SRC)
+# files
+
+%_fPIC.o: %.c
 	$(CC) $(CFLAGS) -fPIC -c $< -o $@
 
 $(OBJ): $(SRC)
