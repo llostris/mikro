@@ -60,10 +60,6 @@ void reply_tcp(union ethframe* frame, struct tcp_header* tcphdr) {
 	printf("\nEnd of reply_tcp()\n"); 
 }
 
-
-
-
-
 void tcp_actions(union ethframe* frame, struct tcp_header* hdr) {
 	printf("\n****** TCP ACTIONS *******\n");
 	switch ( hdr->flags ) {
