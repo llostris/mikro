@@ -118,7 +118,7 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 		return -1;
 	}
 
-	printf("socket opened\n");
+//	printf("socket opened\n");
 
 	/* Get interface index and hardware address of host */
 	int ifindex = 0;
@@ -127,7 +127,7 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 		return -1;
 	}
 
-	printf("address aquaired\n");
+//	printf("address aquaired\n");
 
 	/* Convert to little endian */
 	hton_ip_address(src_ip_addr);	
@@ -135,7 +135,7 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 		hton_ip_address(dest_ip_addr);
 	hton_ip_address(ipv6_multicast);	
 
-	printf("addresses hton'ed\n");
+//	printf("addresses hton'ed\n");
 
 	/* Create ICMP header */
 	struct icmp6_hdr icmphdr;
@@ -154,7 +154,7 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 	else
 		memcpy(icmphdr.data + ICMP_RESERVED_LEN, src_ip_addr, IPV6_ADDR_LEN * 2);
 
-	printf("icmpv6 header created\n");	
+//	printf("icmpv6 header created\n");	
 
 	/* Create IPv6 Header */
 	struct ip6_hdr ipv6hdr;
@@ -210,7 +210,7 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 
 	close(sockfd);
 
-	printf("Everything worked!\n");
+//	printf("Everything worked!\n");
 }
 
 void echo_reply(union ethframe* frame) {
@@ -232,18 +232,20 @@ void echo_reply(union ethframe* frame) {
 
 	/* Change ICMP Packet */
 	struct icmp6_hdr* icmphdr;
-	icmphdr = (struct icmp6_hdr*) frame->field.data + IPV6_HDR_LEN;
-	memset(&icmphdr->type, 0, 2);	// type = 0, code = 0
+	icmphdr = (struct icmp6_hdr*) (frame->field.data + IPV6_HDR_LEN);
+	icmphdr->type = ICMP_ECHO_REPLY;
+	icmphdr->code = 0;
+	icmphdr->checksum = 0;
 
 	printf("-- icmp packet done \n");
-	printf("Payload: %d\n", iphdr->payload_len);
+//	printf("Payload: %d\n", iphdr->payload_len);
 
 	/* Calculate Checksum */
 	icmphdr->checksum = checksum_pseudo(icmphdr, iphdr->source_address, iphdr->destination_address, NEXT_HDR_ICMP, (uint32_t) ntohs(iphdr->payload_len));
 
 	printf("\n checksum calculated\n");
 	
-	send_frame(frame, ETH_HDR_LEN + IPV6_HDR_LEN + iphdr->payload_len);
+	send_frame(frame, ETH_HDR_LEN + IPV6_HDR_LEN + ntohs(iphdr->payload_len));
 	printf("\nEnd of echo_reply()\n"); 
 }
 
@@ -339,9 +341,10 @@ void icmp_actions(union ethframe* frame, struct ip6_hdr* iphdr, struct icmp6_hdr
 			printf("\n!!!!!!!!!!!!!!! sending advert...\n");
 			send_ndp_advert(frame);
 		}
-	} else if ( icmphdr->code == ICMP_NDP_ADVERT ) {
+	} else if ( icmphdr->type == ICMP_NDP_ADVERT ) {
 		update_mac_table(iphdr->source_address, frame->field.header.src);
-	} else if ( ipv6_addr_compare(iphdr->destination_address, src_ip_address) && icmphdr->code == ICMP_ECHO_REQUEST ) {
+	}
+	if ( ipv6_addr_compare(iphdr->destination_address, src_ip_address) && icmphdr->type == ICMP_ECHO_REQUEST && icmphdr->code == 0) {
 		printf("-- REPLYING TO ECHO\n");
 		echo_reply(frame);
 	}

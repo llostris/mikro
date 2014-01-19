@@ -40,6 +40,7 @@ int parsed_ipv6(union ethframe* frame, struct ip6_hdr* iphdr) {
 
 int parse_eth_frame(union ethframe* frame, void* buffer) {
 	memcpy(frame->buffer, buffer, ETH_FRAME_LEN);
+/*
 	int i;
 	printf("\ndestination and source address: \n");
 	for ( i = 0; i < 12; i++ )
@@ -49,7 +50,7 @@ int parse_eth_frame(union ethframe* frame, void* buffer) {
 
 	//if ( frame->field.header.proto == htons(ETH_TYPE_IP6))
 	for ( i = 0; i < 100; i++ )
-		printf("%x", frame->field.data[i]);
+		printf("%x", frame->field.data[i]); */
 
 }
 
@@ -72,8 +73,8 @@ int parsed_tcp(union ethframe* frame, struct tcp_header* hdr) {
 	parse_tcp(frame, hdr);
 	printf("\nSource port: %d\n", hdr->source_port);
 	printf("Destination port: %d\n", hdr->destination_port);
-	printf("Sequence number: %d\n", hdr->sequence_number);
-	printf("Acknowledgement number: %d\n", hdr->acknowledgement_number);	
+	printf("Sequence number: %x\n", hdr->sequence_number);
+	printf("Acknowledgement number: %x\n", hdr->acknowledgement_number);	
 	printf("Flags: %d\n", hdr->flags);
 	printf("Data offset: %d\n", hdr->data_offset);
 	printf("Window size: %d\n", hdr->window_size);
