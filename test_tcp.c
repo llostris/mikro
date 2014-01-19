@@ -45,18 +45,18 @@ int send_tcp(uint16_t* dest_ipaddr) {
 
 	/* Create TCP Header */
 	struct tcp_header tcpheader;
-	tcpheader.source_port = PORT_HTTP;
-	tcpheader.destination_port = 30;
+	tcpheader.source_port = htons(PORT_HTTP);
+	tcpheader.destination_port = htons(30);
 	tcpheader.sequence_number = 0;
 	tcpheader.acknowledgement_number = 0;
 	tcpheader.data_offset = 5;
 	tcpheader.reserved = 0;
 	tcpheader.flags = TCP_FLAG_SYN;
-	tcpheader.window_size = 10;
+	tcpheader.window_size = htons(10);
 	tcpheader.urgent_pointer = 0;
 	tcpheader.checksum = 0;
 
-	hton_structure(&tcpheader, TCP_HDR_LEN);
+	//hton_structure(&tcpheader, TCP_HDR_LEN);
 	printf("\ntcp header (without checksum) created\n");
 
 	/* Create IPv6 Header */

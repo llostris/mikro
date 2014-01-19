@@ -14,7 +14,7 @@
 
 #define TCP_FLAG_NS	256	/* ECN-nonce concealment protection */
 #define TCP_FLAG_CWR	128	/* Congestion Window Reduced (CWR) flag is set by the sending host to indicate that it received a TCP segment with the ECE flag set and had responded in congestion control mechanism */
-#define TCP_FLAG ECE	64	/* ECN-Echo: 1 - ECN capable */
+#define TCP_FLAG_ECN	64	/* ECN-Echo: 1 - ECN capable */
 #define TCP_FLAG_URG	32	/* Urgent pointer field is significant */
 #define TCP_FLAG_ACK	16	/* Acknowledgement field is significant. Set after the initial SYN packet sent by client */
 #define TCP_FLAG_PSH	8	/*  Push function. Asks to push the buffered data to the receiving application. */
@@ -27,12 +27,19 @@ struct tcp_header {
 	uint16_t destination_port;
 	uint32_t sequence_number;
 	uint32_t acknowledgement_number;
+	uint16_t
+		reserved: 4,
+		data_offset: 4,
+		flags: 8;
+	uint16_t window_size;
+
+/*
 	uint32_t
 		flags: FLAGS_SIZE,
-		reserved: 3,	/* Always 000 */
-
 		data_offset: 4,	 /* Header size in 32-bit words. Min. 5, max. 15. */
-		window_size: 16;
+//		reserved: 3,	/* Always 000 */
+
+//		window_size: 16;
 	uint16_t checksum;
 	uint16_t urgent_pointer;
 	uint32_t options[OPTIONS_LENGTH];

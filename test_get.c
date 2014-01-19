@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
 			printf("no frame... ");
 			//errorhandling .... 
 		} else {
-			printf("%d\n", frame_len);
+			//printf("%d\n", frame_len);
 			union ethframe frame;
 			parse_eth_frame(&frame, buffer);
 			if ( ntohs(frame.field.header.proto) == ETH_TYPE_IP6  ) {

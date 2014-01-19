@@ -4,7 +4,7 @@ OBJS = eth0.o ipv6.o ndp.o tcp.o testing.o test.o #test1.o test2.o
 LIBNAME = libip
 LIB = -L. -lip
 LIBPATH = -Wl,-rpath=.
-TESTS =  test_ndp.o test_eth0.o test_geteth0.o test_getndp.o test_getndp2.o test_tcp.o test_get.o test_client.o test_listen.o
+TESTS =  test_ndp.o test_eth0.o test_geteth0.o test_getndp.o test_getndp2.o test_get.o # test_tcp.o test_client.o test_listen.o
 OBJS_D = $(OBJS:.o=_fPIC.o)
 TESTS_D = $(TESTS:test_%=dtest_%)
 
