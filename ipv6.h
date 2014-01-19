@@ -14,10 +14,14 @@
 /* ICMP Types */
 #define ICMP_NDP_SOLICIT	135
 #define ICMP_NDP_ADVERT		136
+#define ICMP_ECHO_REQUEST	128
+#define ICMP_ECHO_REPLY		129
 
 #define ICMP_FLAG_SOLICITED	64	/* 0x01000000 */
 #define ICMP_FLAG_OVERRIDE	32	/* 0x00100000 */
 #define ICMP_ADVERT_SOLICITED	1
+#define NDP_OPT_SRC_ADDR	1
+#define NDP_OPT_TARGET_ADDR	2
 
 /* IPv6 Field Values */
 #define DEFAULT_TTL	255
@@ -39,6 +43,7 @@ struct icmp6_hdr {
 	//uint32_t reserved;	// zmienic na reserved + payload?
 	uint8_t data[ICMP_NDP_LEN];
 };
+
 
 // big endian version
 struct ip6_hdr_be {

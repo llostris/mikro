@@ -28,7 +28,8 @@ int main(int argc, char* argv[])
 		printf("Error getting host's data\n");
 		return -1;
 	}
-	uint16_t src_ipaddr[IPV6_ADDR_LEN] = { 0xfe80, 0x0, 0xa00, 0x27ff, 0xfe5c, 0x2c16, 0x0, 0x0 };
+	uint16_t src_ipaddr[IPV6_ADDR_LEN];
+	memcpy(&src_ipaddr, &src_ip_address, 2 * IPV6_ADDR_LEN);
 
 	void* buffer = (void*)malloc(ETH_FRAME_LEN);
 	int frame_len = 0;

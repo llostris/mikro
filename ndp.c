@@ -189,7 +189,7 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 	memcpy(frame.field.header.src, src_hw, ETH_ADDR_LEN);
 	frame.field.header.proto = htons(ETH_TYPE_IP6);
 	memcpy(frame.field.data, &ipv6hdr, IPV6_HDR_LEN);
-	memcpy(frame.field.data + IPV6_HDR_LEN, &icmphdr, ntohs(ipv6hdr.payload_len));
+	memcpy(frame.field.data + IPV6_HDR_LEN, &icmphdr, ICMP_HDR_LEN + ICMP_NDP_LEN);
 
 	int frame_len = ICMP_HDR_LEN + IPV6_HDR_LEN + ETH_HDR_LEN + ICMP_NDP_LEN;
 	printf("frame created\n");
@@ -213,14 +213,137 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 	printf("Everything worked!\n");
 }
 
+void echo_reply(union ethframe* frame) {
+	void* buffer = (void*) malloc(100);
+
+	/* Change MAC addresses */
+	memcpy(buffer, frame->field.header.dest, ETH_ADDR_LEN);
+	memcpy(frame->field.header.dest, frame->field.header.src, ETH_ADDR_LEN);
+	memcpy(frame->field.header.src, buffer, ETH_ADDR_LEN);
+	
+	/* Change IP addresses */
+	struct ip6_hdr* iphdr;
+	iphdr = (struct ip6_hdr*) frame->field.data;
+	memcpy(buffer, iphdr->destination_address, 2 * IPV6_ADDR_LEN);
+	memcpy(iphdr->destination_address, iphdr->source_address, 2 * IPV6_ADDR_LEN);
+	memcpy(iphdr->source_address, buffer, 2 * IPV6_ADDR_LEN);
+
+	printf("-- addresses swapped --\n");
+
+	/* Change ICMP Packet */
+	struct icmp6_hdr* icmphdr;
+	icmphdr = (struct icmp6_hdr*) frame->field.data + IPV6_HDR_LEN;
+	memset(&icmphdr->type, 0, 2);	// type = 0, code = 0
+
+	printf("-- icmp packet done \n");
+	printf("Payload: %d\n", iphdr->payload_len);
+
+	/* Calculate Checksum */
+	icmphdr->checksum = checksum_pseudo(icmphdr, iphdr->source_address, iphdr->destination_address, NEXT_HDR_ICMP, (uint32_t) ntohs(iphdr->payload_len));
+
+	printf("\n checksum calculated\n");
+	
+	send_frame(frame, ETH_HDR_LEN + IPV6_HDR_LEN + iphdr->payload_len);
+	printf("\nEnd of echo_reply()\n"); 
+}
+
+
+int send_ndp_advert(union ethframe* frame) {
+	printf("\nBeggining of ndp advert()\n");
+	unsigned char src_hw[ETH_ADDR_LEN];	
+	unsigned char dest_hw[ETH_ADDR_LEN] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };	// broadcast
+
+	int sockfd;
+	if ( (sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW)) < 0 ) {
+		printf("Error: could not open a socket.\n");
+		return -1;
+	}
+
+	/* Get interface index and hardware address of host */
+	int ifindex = 0;
+	if ( get_hardware_info(&ifindex, src_hw/*frame->field.header.src*/, sockfd) < 0 ) {
+		printf("Error: could not get hardware's information\n");
+		return -1;
+	}
+
+	/* Create ICMP Header */
+
+	struct icmp6_hdr icmphdr;
+	icmphdr.code = 0;
+	icmphdr.type = ICMP_NDP_ADVERT;
+	icmphdr.checksum = 0;
+	memset(icmphdr.data, ICMP_FLAG_SOLICITED + ICMP_FLAG_OVERRIDE, 1); 
+	memset(icmphdr.data + 1, 0, 3);
+
+	void* buffer = (void*) malloc(100);
+
+	/* Change MAC addresses */
+	memcpy(buffer, frame->field.header.dest, ETH_ADDR_LEN);
+	memcpy(frame->field.header.dest, frame->field.header.src, ETH_ADDR_LEN);
+	memcpy(frame->field.header.src, buffer, ETH_ADDR_LEN);
+	
+	/* Change IP addresses */
+	struct ip6_hdr* iphdr;
+	iphdr = (struct ip6_hdr*) frame->field.data;
+	memcpy(iphdr->destination_address, iphdr->source_address, 2 * IPV6_ADDR_LEN);
+	memcpy(iphdr->source_address, src_ip_address, 2 * IPV6_ADDR_LEN);
+	hton_structure(iphdr->source_address, 2 * IPV6_ADDR_LEN);
+
+	/* Replace the previous ICMP header by a new one */
+	memcpy(frame->field.data + IPV6_HDR_LEN, &icmphdr, ICMP_HDR_LEN + ICMP_RESERVED_LEN);
+	struct icmp6_hdr* ptr;
+	ptr = (struct icmp6_hdr*) (frame->field.data + IPV6_HDR_LEN);
+	
+	// if options == 1 -> set options = 2 & MAC addr
+	memset(frame->field.data + IPV6_HDR_LEN + ICMP_HDR_LEN + ICMP_NDP_LEN, 2, 1);
+	memcpy(frame->field.data + IPV6_HDR_LEN + ICMP_HDR_LEN + ICMP_NDP_LEN + 2, src_hw, ETH_ADDR_LEN);
+
+	/* Calculate TCP Checksum */
+	int len = ntohs(iphdr->payload_len);
+	ptr->checksum = checksum_pseudo(ptr, iphdr->source_address, iphdr->destination_address, NEXT_HDR_ICMP, len);
+	printf("\n checksum calculated\n");
+
+	/* Send frame */
+	int frame_len = ETH_HDR_LEN + IPV6_HDR_LEN + ntohs(iphdr->payload_len);
+	memcpy(frame->field.header.src, src_hw, ETH_ADDR_LEN);
+
+	struct sockaddr_ll sockaddr;
+	memset((void*)&sockaddr, 0, sizeof(sockaddr));
+	sockaddr.sll_family = PF_PACKET;
+	sockaddr.sll_ifindex = ifindex;
+	sockaddr.sll_halen = ETH_ADDR_LEN;
+	memcpy((void*)sockaddr.sll_addr, (void*) dest_hw /*frame->field.header.dest*/, ETH_ADDR_LEN);
+	
+	if ( sendto(sockfd, frame->buffer, frame_len, 0, (struct sockaddr*) &sockaddr, sizeof(sockaddr)) <= 0 ) {
+		printf("Error sending a frame");
+		return -1;
+	} 
+
+	printf("\n *** FRAME SENT.");	// debugging
+
+	close(sockfd);
+
+	printf("\nEnd of ndp_advert()\n"); 
+	
+}
 
 
 
 void icmp_actions(union ethframe* frame, struct ip6_hdr* iphdr, struct icmp6_hdr* icmphdr, uint16_t* src_ipaddr) {
-	if ( icmphdr->code == ICMP_NDP_SOLICIT && ipv6_addr_compare(iphdr->source_address, src_ipaddr) ) {
-		send_ndp_advertisement(ICMP_ADVERT_SOLICITED, iphdr->source_address, frame->field.header.src);
+	uint16_t ipaddr[IPV6_ADDR_LEN];
+	memcpy(&ipaddr, icmphdr->data + ICMP_RESERVED_LEN, 2 * IPV6_ADDR_LEN);
+	ntoh_structure(ipaddr, 2 * IPV6_ADDR_LEN);
+	
+	if ( icmphdr->type == ICMP_NDP_SOLICIT ) {
+		if (ipv6_addr_compare(iphdr->destination_address, src_ipaddr) || ipv6_addr_compare(ipaddr, src_ip_address) ) {
+			printf("\n!!!!!!!!!!!!!!! sending advert...\n");
+			send_ndp_advert(frame);
+		}
 	} else if ( icmphdr->code == ICMP_NDP_ADVERT ) {
 		update_mac_table(iphdr->source_address, frame->field.header.src);
+	} else if ( ipv6_addr_compare(iphdr->destination_address, src_ip_address) && icmphdr->code == ICMP_ECHO_REQUEST ) {
+		printf("-- REPLYING TO ECHO\n");
+		echo_reply(frame);
 	}
 }
 
@@ -270,10 +393,13 @@ void print_mac_table() {
 	printf("------ MAC TABLE ------ \n");
 	for ( iter = 0; iter < mac_index; iter++ ) {
 		printf("\nIP: ");
-		for ( i = 0; i < 2 * IPV6_ADDR_LEN; i++ )
+		for ( i = 0; i < IPV6_ADDR_LEN; i++ )
 			printf("%x ", mac_table[iter].ip_addr[i]);
 		printf("\nMAC: ");
 		for ( i = 0; i < ETH_ADDR_LEN; i++ )
 			printf("%x ", mac_table[iter].mac_addr[i]);
 	}
 }
+
+
+

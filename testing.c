@@ -22,7 +22,7 @@ int parsed_ipv6(union ethframe* frame, struct ip6_hdr* iphdr) {
 	parse_ipv6(frame, iphdr);
 	struct ip6_hdr_be hdr;
 	memcpy(&hdr, frame->field.data, IPV6_HDR_LEN);
-
+/*
 	printf("\nPayload: %d\n", iphdr->payload_len);
 	printf("Next header: %d\n", iphdr->next_hdr);
 	printf("TTL: %d\n", iphdr->hop_limit);
@@ -33,6 +33,7 @@ int parsed_ipv6(union ethframe* frame, struct ip6_hdr* iphdr) {
 	int ind;
 	for ( ind = 0; ind < 2 * IPV6_ADDR_LEN; ind++ )
 		printf("%x ", iphdr->source_address[ind]);
+*/
 
 }
 

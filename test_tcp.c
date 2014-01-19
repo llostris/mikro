@@ -3,10 +3,10 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <string.h>
-#include <netinet/in.h>	// ??
-#include <net/if.h>	// interface
-#include <sys/ioctl.h>	//ioctl flags
-#include <netpacket/packet.h> // struct sockaddr_ll
+#include <netinet/in.h>	
+#include <net/if.h>	
+#include <sys/ioctl.h>	
+#include <netpacket/packet.h> 
 
 #include "ipv6.h"
 #include "types.h"
@@ -50,6 +50,7 @@ int send_tcp(uint16_t* dest_ipaddr) {
 	tcpheader.sequence_number = 0;
 	tcpheader.acknowledgement_number = 0;
 	tcpheader.data_offset = 5;
+	tcpheader.reserved = 0;
 	tcpheader.flags = TCP_FLAG_SYN;
 	tcpheader.window_size = 10;
 	tcpheader.urgent_pointer = 0;
@@ -60,11 +61,6 @@ int send_tcp(uint16_t* dest_ipaddr) {
 
 	/* Create IPv6 Header */
 	struct ip6_hdr ipv6hdr;
-/*
-	ipv6hdr.version = 0x6;
-	ipv6hdr.traffic_class = 0x0;
-	ipv6hdr.flow_label = 0x0;
-*/
 	ipv6hdr.version = 6;
 	ipv6hdr.traffic_class1 = 0;
 	ipv6hdr.traffic_class2 = 0;

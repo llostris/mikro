@@ -3,9 +3,9 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <string.h>
-#include <netinet/in.h>	// ??
-#include <net/if.h>	// interface
-#include <sys/ioctl.h>	//ioctl flags
+#include <netinet/in.h>	
+#include <net/if.h>	
+#include <sys/ioctl.h>
 #include <netpacket/packet.h> // struct sockaddr_ll
 
 #include <eth0.h>
@@ -74,6 +74,8 @@ int send_frame(union ethframe* frame, int frame_len) {
 		printf("Error: could not get hardware's information\n");
 		return -1;
 	}
+
+	memcpy(frame->field.header.src, src_hw, ETH_ADDR_LEN);
 
 	struct sockaddr_ll sockaddr;
 	memset((void*)&sockaddr, 0, sizeof(sockaddr));

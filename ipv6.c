@@ -12,7 +12,7 @@
 #include <ipv6.h>
 #include <eth0.h>
 
-uint16_t src_ip_address[2 * IPV6_ADDR_LEN] = { 0xfe80, 0x0, 0xa00, 0x27ff, 0xfe5c, 0x2c16, 0x0, 0x0 };
+uint16_t src_ip_address[2 * IPV6_ADDR_LEN] = { 0xfe80, 0x0, 0x0, 0x0, 0xa00, 0x27ff, 0xfe5c, 0x2c17, };
 
 /* Converts IPv6 address to big endian */
 void hton_ip_address(uint16_t* ip_address) {
@@ -24,7 +24,6 @@ void hton_ip_address(uint16_t* ip_address) {
 
 /* Calculates ICMP checksum */
 uint16_t checksum(void* data, uint16_t length) {
-	printf("checksum calculation\n");
 	uint16_t *dataptr = data;
 	long sum = 0;
 
@@ -101,6 +100,12 @@ void parse_ipv6(union ethframe* frame, struct ip6_hdr* iphdr) {
 void parse_icmp(union ethframe* frame, struct icmp6_hdr* hdr) {
 	memcpy(hdr, frame->field.data + IPV6_HDR_LEN, ICMP_HDR_LEN + ICMP_NDP_LEN);
 	ntoh_structure(hdr, ICMP_HDR_LEN);
+	int buf;
+	buf = hdr->code;
+	hdr->code = hdr->type;
+	hdr->type = buf;
+//	if ( hdr->code == ICMP_NDP_SOLICIT || hdr->code == ICMP_NDP_ADVERT )
+//		ntoh_structure(hdr->data, ICMP_NDP_LEN);
 }
 
 

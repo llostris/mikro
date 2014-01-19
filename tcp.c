@@ -3,8 +3,8 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <string.h>
-#include <netinet/in.h>	// ??
-#include <net/if.h>	// interface
+#include <netinet/in.h>	
+#include <net/if.h>
 #include <sys/ioctl.h>	//ioctl flags
 #include <netpacket/packet.h> // struct sockaddr_ll
 

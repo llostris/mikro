@@ -3,10 +3,10 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <string.h>
-#include <netinet/in.h>	// ??
-#include <net/if.h>	// interface
-#include <sys/ioctl.h>	//ioctl flags
-#include <netpacket/packet.h> // struct sockaddr_ll
+#include <netinet/in.h>	
+#include <net/if.h>	
+#include <sys/ioctl.h>	
+#include <netpacket/packet.h> 
 
 #include "eth0.h"
 #include "ipv6.h"
