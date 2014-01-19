@@ -18,7 +18,7 @@ void parse_tcp(union ethframe* frame, struct tcp_header* hdr) {
 	ntoh_structure(hdr, TCP_HDR_LEN);
 }
 
-void create_tcp_hdr(struct tcp_header* hdr, int dest_port, int flags, int ack_num, int seq_num) {
+void create_tcp_hdr(struct tcp_header* hdr, int dest_port, int flags, int ack_num, int seq_num, int window_size) {
 	printf("\nNew tcp header");
 
 	hdr->source_port = PORT_HTTP;
@@ -27,7 +27,7 @@ void create_tcp_hdr(struct tcp_header* hdr, int dest_port, int flags, int ack_nu
 	hdr->acknowledgement_number = ack_num;
 	hdr->data_offset = 5;
 	hdr->flags = flags;
-	hdr->window_size = 20;
+	hdr->window_size = window_size;
 	hdr->checksum = 0;
 	hdr->urgent_pointer = 0;
 
@@ -54,7 +54,7 @@ void reply_tcp(union ethframe* frame, struct tcp_header* tcphdr) {
 
 	/* Calculate TCP Checksum */
 	tcphdr->checksum = checksum_pseudo(tcphdr, iphdr->source_address, iphdr->destination_address, NEXT_HDR_TCP, TCP_HDR_LEN);
-	
+
 	/* Replace the previous TCP header by a new one */
 	memcpy(frame->field.data + IPV6_HDR_LEN, tcphdr, TCP_HDR_LEN);
 	printf("\nEnd of reply_tcp()\n"); 
@@ -71,11 +71,11 @@ void tcp_actions(union ethframe* frame, struct tcp_header* hdr) {
 			printf("\n---- SENDING TCP SYN-ACK ----\n");
 			/* We got a TCP packet with a SYN flag: reply with SYN-ACK */
 			struct tcp_header response_tcp;
-			create_tcp_hdr(&response_tcp, hdr->source_port, TCP_FLAG_SYN + TCP_FLAG_ACK, hdr->acknowledgement_number + 1, 0);	
+			create_tcp_hdr(&response_tcp, hdr->source_port, TCP_FLAG_SYN + TCP_FLAG_ACK, hdr->acknowledgement_number + 1, 0, hdr->window_size);	
 			// sequence_number is a random number TO BE REMEMBERED
 			printf("... getting to reply_tcp()");
 			reply_tcp(frame, &response_tcp);
-			printf("... sedning frame ... ");
+			printf("... sending frame ... ");
 			send_frame(frame, ETH_HDR_LEN + IPV6_HDR_LEN + TCP_HDR_LEN);
 			break;
 		}
