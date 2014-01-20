@@ -37,15 +37,12 @@ int main(int argc, char* argv[])
 
 	printf("waiting for frames...\n");
 
-	while ( 1 ) {
-		printf("-");
-		
+	while ( 1 ) {		
 		frame_len = recvfrom(sockfd, buffer, ETH_FRAME_LEN, 0, NULL, NULL);
 		if (frame_len == -1) { 
 			printf("no frame... ");
 			//errorhandling .... 
 		} else {
-			//printf("%d\n", frame_len);
 			union ethframe* frame;
 			frame = malloc(sizeof(union ethframe));
 			parse_eth_frame(frame, buffer);
@@ -61,7 +58,6 @@ int main(int argc, char* argv[])
 			}
 			free(frame);
 		}
-		printf("\n\n");
 	}
 
 	close(sockfd);

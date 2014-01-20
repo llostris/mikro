@@ -32,17 +32,9 @@ struct tcp_header {
 		data_offset: 4,
 		flags: 8;
 	uint16_t window_size;
-
-/*
-	uint32_t
-		flags: FLAGS_SIZE,
-		data_offset: 4,	 /* Header size in 32-bit words. Min. 5, max. 15. */
-//		reserved: 3,	/* Always 000 */
-
-//		window_size: 16;
 	uint16_t checksum;
 	uint16_t urgent_pointer;
-	uint32_t options[OPTIONS_LENGTH];
+	//uint32_t options[OPTIONS_LENGTH];
 };
 
 struct tcp_frame {

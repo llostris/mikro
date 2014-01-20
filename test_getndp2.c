@@ -36,16 +36,16 @@ int main(int argc, char* argv[])
 
 	printf("waiting for frames...\n");
 
+	union ethframe frame;
+
 	while ( 1 ) {
-		printf("-");
-		
 		frame_len = recvfrom(sockfd, buffer, ETH_FRAME_LEN, 0, NULL, NULL);
 		if (frame_len == -1) { 
 			printf("no frame... ");
 			//errorhandling .... 
 		} else {
-			printf("%d\n", frame_len);
-			union ethframe frame;
+		//	printf("%d\n", frame_len);
+			memset(&frame, 0, ETH_FRAME_LEN);
 			parse_eth_frame(&frame, buffer);
 			if ( ntohs(frame.field.header.proto) == ETH_TYPE_IP6 ) {
 				struct ip6_hdr iphdr;
@@ -57,12 +57,9 @@ int main(int argc, char* argv[])
 				print_mac_table();
 			}
 		}
-		printf("\n\n");
 	}
 
-	/* get frame's data */
-	
-
+	free(buffer);
 	close(sockfd);
 
 	printf("Everything worked!\n");

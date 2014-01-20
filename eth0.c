@@ -10,6 +10,8 @@
 
 #include <eth0.h>
 #include <types.h>
+#include <ipv6.h>
+#include <tcp.h>
 
 int get_hardware_info(int* ifindex, unsigned char* hw_addr, int sockfd) {
 	char *iface = "eth0";
@@ -55,6 +57,18 @@ void ntoh_structure(void* buffer, unsigned int size) {
 		ptr++;
 	}
 }
+
+void htonl_structure(void* buffer, unsigned int size) {
+	uint32_t* ptr = buffer;
+	int index = 0;
+	for (index = 0; index < size/4; index++) {
+		*ptr = htonl(*ptr);
+		ptr++;
+	}
+}
+
+
+
 
 int send_frame(union ethframe* frame, int frame_len) {
 	int proto = ETH_TYPE_IP6;

@@ -8,6 +8,7 @@
 #include <net/if.h>
 #include <sys/ioctl.h>	//ioctl flags
 #include <netpacket/packet.h> // struct sockaddr_ll
+#include <string.h>
 
 #include <types.h>
 #include <ipv6.h>
@@ -51,7 +52,7 @@ void create_tcp_hdr(struct tcp_header* hdr, int dest_port, int flags, int ack_nu
 
 	hdr->source_port = htons(PORT_HTTP);
 	hdr->destination_port = htons(dest_port);
-	hdr->sequence_number = 0;
+	hdr->sequence_number = htonl(seq_num);
 	hdr->acknowledgement_number = htonl(ack_num);
 	hdr->data_offset = data_offset;
 	hdr->reserved = 0;
@@ -80,11 +81,13 @@ void reply_tcp(union ethframe* frame, struct tcp_header* tcphdr) {
 	memcpy(iphdr->source_address, buffer, 2 * IPV6_ADDR_LEN);
 
 	/* Replace the previous TCP header by a new one */
-	memcpy(frame->field.data + IPV6_HDR_LEN, tcphdr, ntohs(iphdr->payload_len));
+	memcpy(frame->field.data + IPV6_HDR_LEN, tcphdr, TCP_HDR_LEN);
 	//tcphdr = frame->field.data + IPV6_HDR_LEN;
 	/* Calculate TCP Checksum */
 	tcphdr = (struct tcp_header*) (frame->field.data + IPV6_HDR_LEN);
 	tcphdr->checksum = checksum_pseudo(tcphdr, iphdr->source_address, iphdr->destination_address, NEXT_HDR_TCP, ntohs(iphdr->payload_len));
+
+	free(buffer);
 	printf("\nChecksum: %x\n", tcphdr->checksum);
 	printf("\nEnd of reply_tcp()\n"); 
 }
@@ -101,10 +104,12 @@ void tcp_actions(union ethframe* frame, struct tcp_header* hdr) {
 			struct tcp_header response_tcp;
 			printf("%u %u\n", hdr->sequence_number, (hdr->sequence_number + 1));
 			create_tcp_hdr(&response_tcp, hdr->source_port, TCP_FLAG_SYN + TCP_FLAG_ACK, hdr->sequence_number + 1, 0/* rand() */, hdr->window_size, hdr->data_offset);	
+
 			// sequence_number is a random number TO BE REMEMBERED
-			printf("... getting to reply_tcp()");
+
+			//printf("... getting to reply_tcp()");
 			reply_tcp(frame, &response_tcp);
-			printf("... sending frame ... ");
+			//printf("... sending frame ... ");
 			struct ip6_hdr* iphdr;
 			iphdr = (struct ip6_hdr*) frame->field.data;
 			hdr = (struct tcp_header*) (frame->field.data + IPV6_HDR_LEN);
@@ -115,42 +120,35 @@ void tcp_actions(union ethframe* frame, struct tcp_header* hdr) {
 
 		case 24 : {
 			printf("\n------ HTTP GET ------\n");
-			/* We got a HTTP GET */
-			printf("\naaaa\n");
-			char* file;// = malloc(sizeof(char));			
+			/* We got a HTTP GET */			
+
+			unsigned char* tmp;
+			tmp = (unsigned char*) (frame->field.data + IPV6_HDR_LEN + TCP_HDR_LEN);
+			if ( is_httpget(tmp) == -1 )
+				break;	/* This is not our HTTP GET */
+	
+			printf("%s\n\n", tmp);
+
+			unsigned char* file;
+			file = malloc(sizeof(char));			
 			printf("\n... parsing file ..\n");
 			//parse_file(file);
-/*
+			file = "HTTP/1.1 200 OK\r\n\n<html><head><title>Mikro Project</title></head><body>Send page</body></html>";
 
-			FILE* filePointer;
-			filePointer = fopen("page.html", "r");
-			char buffer;
-	
-			if(filePointer == NULL)
-			{
-				fprintf(stderr, "Can't open input file\n");
-			} else {
-				while(fread(&buffer, 1, 1, filePointer) != 0) {
-					if(strcmp(&buffer, "\t") && strcmp(&buffer, "\n")) 
-						strcat(file, &buffer);
-				}
-			}
-			fclose(filePointer);*/
-			file = "HTTP/1.1 302 Found <html><head><title>Mikro Project</title></head><body>Send page</body></html>";
-
-			printf("FILE: %s", file);
+			printf("FILE: %s\n", file);
+			printf("%x %x %x %x\n", file[0], file[1], file[2], file[3]);
 
 			struct tcp_header response_tcp;
-			create_tcp_hdr(&response_tcp, hdr->source_port, TCP_FLAG_PSH + TCP_FLAG_ACK, hdr->sequence_number + 1, 0/* rand() */, hdr->window_size, hdr->data_offset);			
+			create_tcp_hdr(&response_tcp, hdr->source_port, TCP_FLAG_PSH + TCP_FLAG_ACK, hdr->sequence_number, hdr->acknowledgement_number, hdr->window_size, hdr->data_offset);
+			// sequence_number is a random number TO BE REMEMBERED
+			
 			struct ip6_hdr* iphdr;
 			iphdr = (struct ip6_hdr*) frame->field.data;
-			hdr = (struct tcp_header*) (frame->field.data + IPV6_HDR_LEN);
 			iphdr->payload_len = htons(TCP_HDR_LEN + strlen(file));
 
-			// sequence_number is a random number TO BE REMEMBERED
 			add_http(frame, file, strlen(file));
 			reply_tcp(frame, &response_tcp);	
-		//	printf("\nChecksum before sending: %x", hdr->checksum);
+
 			send_frame(frame, ETH_HDR_LEN + IPV6_HDR_LEN + ntohs(iphdr->payload_len));
 
 			break;
@@ -162,8 +160,8 @@ void tcp_actions(union ethframe* frame, struct tcp_header* hdr) {
 
 void add_http(union ethframe* frame, char* file, int file_len) {
 	printf("Count %d: \n", file_len);
-	struct ip6_hdr* iphdr;
-	struct tcp_header* tcphdr;
-	tcphdr = (struct tcp_header*) frame->field.data + IPV6_HDR_LEN;
-	memcpy(tcphdr + TCP_HDR_LEN, file, file_len);
+	unsigned char* tmp;
+	tmp = (unsigned char*) (frame->field.data + IPV6_HDR_LEN + TCP_HDR_LEN);
+	strncpy(tmp, file, file_len);
+	printf("... added http.. \n");
 }
