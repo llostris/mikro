@@ -78,8 +78,6 @@ int send_ndp_solicitation(uint16_t* ip_addr) {
 
 
 	int frame_len = ICMP_HDR_LEN + IPV6_HDR_LEN + ETH_HDR_LEN + ICMP_NDP_LEN;
-	printf("frame created\n");
-
 	/* prepare the socket */
 
 	struct sockaddr_ll sockaddr;
@@ -192,7 +190,6 @@ int send_ndp_advertisement(int solicited, uint16_t* dest_ip_addr, uint8_t* dest_
 	memcpy(frame.field.data + IPV6_HDR_LEN, &icmphdr, ICMP_HDR_LEN + ICMP_NDP_LEN);
 
 	int frame_len = ICMP_HDR_LEN + IPV6_HDR_LEN + ETH_HDR_LEN + ICMP_NDP_LEN;
-	printf("frame created\n");
 
 	/* prepare the socket */
 
@@ -338,7 +335,7 @@ void icmp_actions(union ethframe* frame, struct ip6_hdr* iphdr, struct icmp6_hdr
 	
 	if ( icmphdr->type == ICMP_NDP_SOLICIT ) {
 		if (ipv6_addr_compare(iphdr->destination_address, src_ipaddr) || ipv6_addr_compare(ipaddr, src_ip_address) ) {
-			printf("\n!!!!!!!!!!!!!!! sending advert...\n");
+			printf("-- SENDING NDP ADVERTISEMENT\n");
 			send_ndp_advert(frame);
 		}
 	} else if ( icmphdr->type == ICMP_NDP_ADVERT ) {

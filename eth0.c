@@ -108,3 +108,23 @@ int send_frame(union ethframe* frame, int frame_len) {
 	close(sockfd);
 
 }
+
+
+
+
+int parse_eth_frame(union ethframe* frame, void* buffer) {
+	memcpy(frame->buffer, buffer, ETH_FRAME_LEN);
+/*
+	int i;
+	printf("\ndestination and source address: \n");
+	for ( i = 0; i < 12; i++ )
+		printf("%x ", frame->field.header.dest[i]);
+	printf("proto: %x\n", ntohs(frame->field.header.proto));
+	printf("\ndata: \n");
+
+	//if ( frame->field.header.proto == htons(ETH_TYPE_IP6))
+	for ( i = 0; i < 100; i++ )
+		printf("%x", frame->field.data[i]); */
+
+}
+
