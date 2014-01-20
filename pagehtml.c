@@ -2,17 +2,15 @@
 #include<string.h>
 #include<stdlib.h>
 
-#define MODE "r"
-#define FILE_NAME "page.html"
-#define MAX_SIZE 1000
+#include "pagehtml.h"
 
-int main(int argc, char* argv[])
-{
+int parse_file(char* file) {
+	printf("HERE... ");
 	FILE* filePointer;
 	filePointer = fopen(FILE_NAME, MODE);
 	char* buffer;
-	char file[MAX_SIZE];
-
+//	char file[MAX_SIZE];
+	
 	if(filePointer == NULL)
 	{
 		fprintf(stderr, "Can't open input file\n");
@@ -22,6 +20,6 @@ int main(int argc, char* argv[])
 				strcat(file, buffer);
 		}
 	}
-	printf("%s", file);
 	fclose(filePointer);
+	return strlen(file);
 }

@@ -46,18 +46,20 @@ int main(int argc, char* argv[])
 			//errorhandling .... 
 		} else {
 			//printf("%d\n", frame_len);
-			union ethframe frame;
-			parse_eth_frame(&frame, buffer);
-			if ( ntohs(frame.field.header.proto) == ETH_TYPE_IP6  ) {
+			union ethframe* frame;
+			frame = malloc(sizeof(union ethframe));
+			parse_eth_frame(frame, buffer);
+			if ( ntohs(frame->field.header.proto) == ETH_TYPE_IP6  ) {
 				struct ip6_hdr iphdr;
-				parsed_ipv6(&frame, &iphdr);
+				parsed_ipv6(frame, &iphdr);
 				if ( iphdr.next_hdr == NEXT_HDR_TCP ) {
 					printf("\n---- TCP PACKET!!! ----- \n");
 					struct tcp_header tcphdr;
-					parsed_tcp(&frame, &tcphdr);
-					tcp_actions(&frame, &tcphdr);
+					parsed_tcp(frame, &tcphdr);
+					tcp_actions(frame, &tcphdr);
 				}
 			}
+			free(frame);
 		}
 		printf("\n\n");
 	}

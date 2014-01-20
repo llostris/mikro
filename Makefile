@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -I. #-Wall 
-OBJS = eth0.o ipv6.o ndp.o tcp.o testing.o #test.o #test1.o test2.o 
+OBJS = eth0.o ipv6.o ndp.o tcp.o pagehtml.o testing.o #test.o #test1.o test2.o 
 LIBNAME = libip
 LIB = -L. -lip
 LIBPATH = -Wl,-rpath=.

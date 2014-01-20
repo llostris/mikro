@@ -53,6 +53,7 @@ struct tcp_frame {
 void parse_tcp(union ethframe* frame, struct tcp_header* hdr);
 void tcp_actions(union ethframe* frame, struct tcp_header* hdr);
 void reply_tcp(union ethframe* frame, struct tcp_header* tcphdr);
-void create_tcp_hdr(struct tcp_header* hdr, int dest_port, int flags, int ack_num, int seq_num, int window_size);
+void create_tcp_hdr(struct tcp_header* hdr, int dest_port, int flags, int ack_num, int seq_num, int window_size, int data_offset);
 
+void add_http(union ethframe* frame, char* file, int file_len);
 #endif
