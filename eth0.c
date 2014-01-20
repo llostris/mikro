@@ -85,7 +85,7 @@ int send_frame(union ethframe* frame, int frame_len) {
 	/* Get interface index and hardware address of host */
 	int ifindex = 0;
 	if ( get_hardware_info(&ifindex, src_hw/*frame->field.header.src*/, sockfd) < 0 ) {
-		printf("Error: could not get hardware's information\n");
+		perror("Error: could not get hardware's information\n");
 		return -1;
 	}
 
@@ -99,7 +99,7 @@ int send_frame(union ethframe* frame, int frame_len) {
 	memcpy((void*)sockaddr.sll_addr, (void*) dest_hw /*frame->field.header.dest*/, ETH_ADDR_LEN);
 
 	if ( sendto(sockfd, frame->buffer, frame_len, 0, (struct sockaddr*) &sockaddr, sizeof(sockaddr)) <= 0 ) {
-		printf("Error sending a frame");
+		perror("Error sending a frame");
 		return -1;
 	} 
 

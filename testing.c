@@ -70,8 +70,6 @@ int parsed_icmp(union ethframe* frame, struct icmp6_hdr* hdr) {
 
 
 int parsed_tcp(union ethframe* frame, struct tcp_header* hdr) {
-	printf("Sequence number: %x\n", hdr->sequence_number);
-
 	parse_tcp(frame, hdr);
 	printf("\nSource port: %d\n", hdr->source_port);
 	printf("Destination port: %d\n", hdr->destination_port);

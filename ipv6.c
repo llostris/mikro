@@ -63,18 +63,6 @@ uint16_t checksum_pseudo(void* data, uint16_t* src_addr, uint16_t* dest_addr, ui
 	memset(buf + 4 * IPV6_ADDR_LEN + 7, next_hdr, 1);	/* 3 octets of 0's and next header's id */
 	memcpy(buf + 4 * IPV6_ADDR_LEN + 8, data, data_len);
 
-/*
-	// for testing
-	int i;
-	printf("Data len: %d\n", data_len);
-	for ( i = 0; i < pseudo_hdr_len; i++ )
-	{
-		printf("%x ", buf[i]);
-		if ( (i + 1) % 16 == 0 )
-			printf("\n");
-	}
-*/	
-
 	return checksum(&buf, pseudo_hdr_len);
 }
 
@@ -104,8 +92,6 @@ void parse_icmp(union ethframe* frame, struct icmp6_hdr* hdr) {
 	buf = hdr->code;
 	hdr->code = hdr->type;
 	hdr->type = buf;
-//	if ( hdr->code == ICMP_NDP_SOLICIT || hdr->code == ICMP_NDP_ADVERT )
-//		ntoh_structure(hdr->data, ICMP_NDP_LEN);
 }
 
 
