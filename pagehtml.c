@@ -10,6 +10,9 @@ int is_httpget(unsigned char* msg) {
 	unsigned char* to_cmp;
 	to_cmp = malloc(strlen(get_msg) + 20);
 	strncpy(to_cmp, msg, strlen(get_msg) + 20);
+	if (strstr( msg, "GET") == NULL )
+		return -1;	
+
 	if ( strstr(to_cmp, "Host: [fe80::a00:27ff:fe5c:2c17]") == NULL )
 		return -1;
 	return 0;
@@ -53,12 +56,16 @@ int parse_file2(unsigned char* file, char* filename) {
 
 int choose_file(unsigned char* req, unsigned char* buff) {
 	unsigned char* to_cmp;
-	to_cmp = malloc(40);
-	strncpy(to_cmp, req, 40);
-	printf("STRSTR: %s\n", strstr(to_cmp, "link.html"));
-	if ( strstr(to_cmp, "link.html") != NULL )
+	to_cmp = malloc(300);
+	strncpy(to_cmp, req, 300);
+	//printf("STRSTR: %s\n", strstr(to_cmp, "link.html"));
+	int result;
+	if ( strstr(to_cmp, "link.html") != NULL ) {
+		free(to_cmp);
 		return parse_file2(buff, "link.html");
-	else
+	} else {
+		free(to_cmp);
 		return parse_file2(buff, "page.html");	
+	}
 	return 0;
 }

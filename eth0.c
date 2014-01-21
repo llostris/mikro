@@ -33,6 +33,8 @@ int get_hardware_info(int* ifindex, unsigned char* hw_addr, int sockfd) {
   	}
 
 	memcpy((void*)hw_addr, (void*)(buffer.ifr_hwaddr.sa_data), ETH_ADDR_LEN);
+	memcpy(src_mac_address, hw_addr, ETH_ADDR_LEN);
+
 
 	return 0;
 }
@@ -57,18 +59,6 @@ void ntoh_structure(void* buffer, unsigned int size) {
 		ptr++;
 	}
 }
-
-void htonl_structure(void* buffer, unsigned int size) {
-	uint32_t* ptr = buffer;
-	int index = 0;
-	for (index = 0; index < size/4; index++) {
-		*ptr = htonl(*ptr);
-		ptr++;
-	}
-}
-
-
-
 
 int send_frame(union ethframe* frame, int frame_len) {
 	int proto = ETH_TYPE_IP6;
@@ -103,12 +93,21 @@ int send_frame(union ethframe* frame, int frame_len) {
 		return -1;
 	} 
 
-	printf("\n *** FRAME SENT.");	// debugging
+//	printf("\n *** FRAME SENT.");	// debugging
 
 	close(sockfd);
 
 }
 
+
+int mac_address_compare(uint8_t* addr1, uint8_t* addr2) {
+	uint8_t result = 1;
+	uint8_t ind = 0;
+	for ( ind = 0; ind < ETH_ADDR_LEN; ind++ )
+		result = result && ( addr1[ind] == addr2[ind]);
+	return result;
+
+}
 
 
 

@@ -225,7 +225,7 @@ void echo_reply(union ethframe* frame) {
 	memcpy(iphdr->destination_address, iphdr->source_address, 2 * IPV6_ADDR_LEN);
 	memcpy(iphdr->source_address, buffer, 2 * IPV6_ADDR_LEN);
 
-	printf("-- addresses swapped --\n");
+//	printf("-- addresses swapped --\n");
 
 	/* Change ICMP Packet */
 	struct icmp6_hdr* icmphdr;
@@ -234,21 +234,21 @@ void echo_reply(union ethframe* frame) {
 	icmphdr->code = 0;
 	icmphdr->checksum = 0;
 
-	printf("-- icmp packet done \n");
+//	printf("-- icmp packet done \n");
 //	printf("Payload: %d\n", iphdr->payload_len);
 
 	/* Calculate Checksum */
 	icmphdr->checksum = checksum_pseudo(icmphdr, iphdr->source_address, iphdr->destination_address, NEXT_HDR_ICMP, (uint32_t) ntohs(iphdr->payload_len));
 
-	printf("\n checksum calculated\n");
+//	printf("\n checksum calculated\n");
 	
 	send_frame(frame, ETH_HDR_LEN + IPV6_HDR_LEN + ntohs(iphdr->payload_len));
-	printf("\nEnd of echo_reply()\n"); 
+//	printf("\nEnd of echo_reply()\n"); 
 }
 
 
 int send_ndp_advert(union ethframe* frame) {
-	printf("\nBeggining of ndp advert()\n");
+//	printf("\nBeggining of ndp advert()\n");
 	unsigned char src_hw[ETH_ADDR_LEN];	
 	unsigned char dest_hw[ETH_ADDR_LEN] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };	// broadcast
 
@@ -300,7 +300,7 @@ int send_ndp_advert(union ethframe* frame) {
 	/* Calculate TCP Checksum */
 	int len = ntohs(iphdr->payload_len);
 	ptr->checksum = checksum_pseudo(ptr, iphdr->source_address, iphdr->destination_address, NEXT_HDR_ICMP, len);
-	printf("\n checksum calculated\n");
+//	printf("\n checksum calculated\n");
 
 	/* Send frame */
 	int frame_len = ETH_HDR_LEN + IPV6_HDR_LEN + ntohs(iphdr->payload_len);
@@ -318,11 +318,11 @@ int send_ndp_advert(union ethframe* frame) {
 		return -1;
 	} 
 
-	printf("\n *** FRAME SENT.");	// debugging
+//	printf("\n *** FRAME SENT.");	// debugging
 
 	close(sockfd);
 
-	printf("\nEnd of ndp_advert()\n"); 
+//	printf("\nEnd of ndp_advert()\n"); 
 	
 }
 

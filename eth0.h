@@ -27,6 +27,8 @@ union ethframe {
         unsigned char buffer[ETH_FRAME_LEN];
 };
 
+int socket_id;	// our socket id
+
 int get_hardware_info(int* ifindex, unsigned char* hw_addr, int sockfd);
 
 /* Performs big endian <-> little endian conversion of whole structures */
@@ -35,6 +37,7 @@ void ntoh_structure(void* buffer, unsigned int size);
 
 int send_frame(union ethframe* frame, int frame_len);
 int parse_eth_frame(union ethframe* frame, void* buffer);
+int mac_address_compare(uint8_t* addr1, uint8_t* addr2);
 
 #endif
 

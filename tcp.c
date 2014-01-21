@@ -67,6 +67,7 @@ void reply_tcp(union ethframe* frame, struct tcp_header* tcphdr) {
 
 
 void tcp_actions(union ethframe* frame, struct tcp_header* hdr) {
+
 	printf("\n****** TCP ACTIONS *******\n");
 	srand(time(NULL));
 	switch ( hdr->flags ) {
@@ -89,14 +90,15 @@ void tcp_actions(union ethframe* frame, struct tcp_header* hdr) {
 		}
 
 		case 24 : {
-			printf("\n------ HTTP GET ------\n");
 			/* We got a HTTP GET REQUEST */			
 
 			unsigned char* request;
 			request = (unsigned char*) (frame->field.data + IPV6_HDR_LEN + TCP_HDR_LEN);
 			if ( is_httpget(request) == -1 )
 				break;	/* This is not our HTTP GET */
-			printf("REQUEST: %s\n", request);
+			printf("\n------ HTTP GET ------\n");
+
+//			printf("%s\n", request);
 
 			unsigned char* file = malloc(300);
 			unsigned char* response = malloc(400);
@@ -105,7 +107,7 @@ void tcp_actions(union ethframe* frame, struct tcp_header* hdr) {
 //			parse_file(file);
 			choose_file(request, file);
 			sprintf(response, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s", strlen(file), file);
-			printf("RESP: \n%s\n", response);
+			//printf("RESP: \n%s\n", response);
 
 			struct tcp_header response_tcp;
 			create_tcp_hdr(&response_tcp, hdr->source_port, TCP_FLAG_PSH + TCP_FLAG_ACK, hdr->sequence_number + 1, hdr->acknowledgement_number, hdr->window_size, hdr->data_offset);

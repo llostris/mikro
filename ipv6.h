@@ -35,6 +35,7 @@
 
 uint16_t src_ip_address[2 * IPV6_ADDR_LEN];
 // = { 0xfe80, 0x0, 0xa00, 0x27ff, 0xfe5c, 0x2c16, 0x0, 0x0 };
+uint8_t src_mac_address[ETH_ADDR_LEN];
 
 struct icmp6_hdr {
 	uint8_t type;
