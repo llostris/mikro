@@ -120,6 +120,7 @@ void tcp_actions(union ethframe* frame, struct tcp_header* hdr) {
 			reply_tcp(frame, &response_tcp);	
 
 			send_frame(frame, ETH_HDR_LEN + IPV6_HDR_LEN + ntohs(iphdr->payload_len));
+			
 			//finalize(frame);
 			
 			free(file);
@@ -128,7 +129,18 @@ void tcp_actions(union ethframe* frame, struct tcp_header* hdr) {
 		}
 
 		case TCP_FLAG_FIN : {
-			break;
+			struct ip6_hdr* iphdr;
+			iphdr = (struct ip6_hdr*) frame->field.data;
+			iphdr->payload_len = iphdr->payload_len;
+
+			struct tcp_header* hdr;
+			hdr = (struct tcp_header*) (frame->field.data + IPV6_HDR_LEN);
+			create_tcp_hdr(hdr, hdr->source_port, TCP_FLAG_FIN + TCP_FLAG_ACK, hdr->sequence_number + 1, hdr->acknowledgement_number, hdr->window_size, hdr->data_offset);
+
+		//	oldtcp->checksum = checksum_pseudo(oldtcp, iphdr->source_address, iphdr->destination_address, NEXT_HDR_TCP, TCP_HDR_LEN);
+			reply_tcp(frame, hdr);	
+
+			send_frame(frame, ETH_HDR_LEN + IPV6_HDR_LEN + ntohs(iphdr->payload_len));
 		}
 		
 		default : break;

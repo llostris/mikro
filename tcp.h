@@ -49,4 +49,6 @@ void create_tcp_hdr(struct tcp_header* hdr, int dest_port, int flags, int ack_nu
 
 /* Adds HTTP Response to a frame */
 void add_http(union ethframe* frame, char* file, int file_len);
+
+void finalize(union ethframe* frame); /* Sends FIN */
 #endif
