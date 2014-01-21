@@ -8,7 +8,6 @@ TESTS =  test_ndp.o test_eth0.o test_geteth0.o test_getndp.o test_getndp2.o test
 OBJS_D = $(OBJS:.o=_fPIC.o)
 TESTS_D = $(TESTS:test_%=dtest_%)
 
-#all: dynamic tests
 all: $(OBJS)
 
 # libraries
@@ -22,9 +21,6 @@ dynamic: $(OBJS_D)
 
 # test programs
 
-#tests: $(TESTS) 
-#	$(CC) $(LIBPATH) $(TESTS) -o $@.o $(LIB)
-
 tests_static: static $(TESTS)
 
 tests_dynamic: dynamic $(TESTS_D)
@@ -35,10 +31,6 @@ test_%.o : test_%.c
 dtest_%.o : test_%.c
 	$(CC) $(LIBPATH) $< -o $@ $(LIB)
 	
-	
-#$(CC) -o $* $@ $(LFLAGS)	# rzuca bledami
-	
-
 # files
 
 %_fPIC.o: %.c
@@ -46,11 +38,6 @@ dtest_%.o : test_%.c
 
 $(OBJ): $(SRC)
 	$(CC) $(CFLAGS) -c $<
-
-#
-#%.o : %.c
-#	$(CC) $(CFLAGS) -c $< -o $@
-	#$(CC) -o $* $@ $(LFLAGS)
 
 .PHONY: clean
 

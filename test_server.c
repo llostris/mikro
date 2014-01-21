@@ -42,7 +42,6 @@ int main(int argc, char* argv) {
 	struct tcp_header tcphdr;
 	struct icmp6_hdr icmphdr;
 
-
 	while ( 1 ) {		
 		memset(buffer, 0, ETH_FRAME_LEN);
 		frame_len = recvfrom(sockfd, buffer, ETH_FRAME_LEN, 0, NULL, NULL);

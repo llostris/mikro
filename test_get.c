@@ -34,10 +34,14 @@ int main(int argc, char* argv[])
 
 	void* buffer = (void*)malloc(ETH_FRAME_LEN);
 	int frame_len = 0;
+	struct ip6_hdr iphdr;
+	struct tcp_header tcphdr;
+	struct icmp6_hdr icmphdr;
 
 	printf("waiting for frames...\n");
 
 	while ( 1 ) {		
+		memset(buffer, 0, ETH_FRAME_LEN);
 		frame_len = recvfrom(sockfd, buffer, ETH_FRAME_LEN, 0, NULL, NULL);
 		if (frame_len == -1) { 
 			printf("no frame... ");
@@ -47,11 +51,9 @@ int main(int argc, char* argv[])
 			frame = malloc(sizeof(union ethframe));
 			parse_eth_frame(frame, buffer);
 			if ( ntohs(frame->field.header.proto) == ETH_TYPE_IP6  && mac_address_compare(frame->field.header.dest, src_mac_address) ) {
-				struct ip6_hdr iphdr;
 				parsed_ipv6(frame, &iphdr);
 				if ( iphdr.next_hdr == NEXT_HDR_TCP ) {
 					printf("\n---- TCP PACKET!!! ----- \n");
-					struct tcp_header tcphdr;
 					parsed_tcp(frame, &tcphdr);
 					tcp_actions(frame, &tcphdr);
 				}
