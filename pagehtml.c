@@ -60,7 +60,7 @@ int choose_file(unsigned char* req, unsigned char* buff) {
 	strncpy(to_cmp, req, 300);
 	//printf("STRSTR: %s\n", strstr(to_cmp, "link.html"));
 	int result;
-	if ( strstr(to_cmp, "link.html") != NULL ) {
+	if ( strstr(req, "link.html") != NULL ) {
 		free(to_cmp);
 		return parse_file2(buff, "link.html");
 	} else {
